@@ -13,7 +13,7 @@ const SUBCATEGORIES = {
   fragrances: ["Men's", "Women's", 'Unisex'],
   backpacks: ['Laptop', 'Travel', 'Casual'],
 };
-const UPLOAD_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://api.savantbd.com/api').replace('/api', '');
+const UPLOAD_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://savantbd.com/api').replace('/api', '');
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState([]);
@@ -285,7 +285,7 @@ export default function AdminProductsPage() {
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-neutral-800 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                           {product.images && product.images[0] ? (
-                            <img src={product.images[0].startsWith('http') ? product.images[0] : `${(process.env.NEXT_PUBLIC_API_URL || 'https://api.savantbd.com/api').replace('/api', '')}${product.images[0]}`} alt="" className="w-full h-full object-cover" />
+                            <img src={product.images[0].startsWith('http') ? product.images[0] : `${(process.env.NEXT_PUBLIC_API_URL || 'https://savantbd.com/api').replace('/api', '')}${product.images[0]}`} alt="" className="w-full h-full object-cover" />
                           ) : (
                             <span className="text-lg font-bold text-neutral-500">{product.name?.charAt(0) || 'R'}</span>
                           )}

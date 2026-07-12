@@ -4,10 +4,12 @@ Architecture for this project:
 
 | Piece        | Host              | Why                                            |
 |--------------|-------------------|------------------------------------------------|
-| Frontend (Next.js) | **Vercel** (free) | Next.js SSR + dynamic `/products/[id]` need a long-running Node server. hPanel shared hosting can't run `next start` reliably. |
-| Backend (Express) | **Hostinger** shared hPanel | Plain request/response Express app. Runs fine under Passenger. |
-| Database     | **Local JSON files** in `backend/data/` | The app uses a file-based store, NOT MongoDB. Atlas is not needed despite the dep in package.json. |
-| User uploads | `backend/uploads/` on Hostinger | Files persist in the hPanel Node app root. |
+| Frontend (Next.js) | **Vercel** (free) at `www.savantbd.com` | Next.js SSR + dynamic `/products/[id]` need a long-running Node server. hPanel shared hosting can't run `next start` reliably. |
+| Backend (Express) | **Hostinger** shared hPanel at `savantbd.com` (apex) | Plain request/response Express app. Runs fine under Passenger. Already live and serving `/api/*` at the apex. |
+| Database     | **Local JSON files** in `~/domains/savantbd.com/nodejs/data/` | The app uses a file-based store, NOT MongoDB. Atlas is not needed despite the dep in package.json. |
+| User uploads | `~/domains/savantbd.com/nodejs/uploads/` on Hostinger | Files persist in the hPanel Node app root. |
+
+> Why apex for backend? The `api.` subdomain couldn't be registered with Hostinger's CDN on this plan, but the apex `savantbd.com` already routes through `*.cdn.hstgr.net` and serves the Passenger Node app. So the backend stays on the apex, and the storefront goes on `www.savantbd.com` (Vercel). `www.savantbd.com` already has a CNAME through Hostinger CDN.
 
 ---
 
@@ -18,16 +20,15 @@ hPanel > **Advanced** > **SSH access** > enable SSH and copy your credentials.
 You can use the File Manager instead of SSH, but SSH is much easier for `npm install` and `npm run seed`.
 
 ### 1.2 Create the Node.js app
-hPanel > **Advanced** > **Node.js** > **Create application**:
-
-- **Node.js version:** 18.x (matches your `package.json`)
+hPanel > **Website** menu (the "web app" feature) > Node.js template:
+- **Node.js version:** 22.x (Hostinger's `alt-nodejs22`)
 - **Application mode:** Production
-- **Application URL / domain:** the subdomain you'll serve the API on, e.g. `api.savantbd.com`
-- **Application root:** e.g. `domains/api.savantbd.com/app`
-- **App startup file:** `app.js`
+- **Application URL / domain:** `savantbd.com` (apex - already hosted)
+- **Application root:** `domains/savantbd.com/nodejs`
+- **App startup file:** `src/index.js`
 - **Package manager:** `npm`
 
-Click **Create**.
+Click **Create** (or it may already exist - the URL works). Hostinger creates an `.htaccess` in `public_html` with Passenger config pointing at `domains/savantbd.com/nodejs`.
 
 ### 1.3 Generate an SSH key for GitHub Actions
 On your PC (PowerShell):
@@ -55,7 +56,7 @@ GitHub repo (https://github.com/ashxyz18/savant) > **Settings > Secrets and vari
 The auto-deploy workflow clones the repo on its **first run**. To trigger it:
 1. Push a commit on the default branch (`main` or `master`) that touches `backend/`.
 2. GitHub repo > **Actions** tab > watch the **Deploy backend to Hostinger** run.
-3. The workflow will SSH in, clone the repo into `~/domains/api.savantbd.com/app`, run `npm install --omit=dev`, and touch `tmp/restart.txt` (Passenger picks up the restart).
+3. The workflow will SSH in, sync `backend/` into `~/domains/savantbd.com/nodejs`, run `npm install --omit=dev`, and touch `tmp/restart.txt` (Passenger picks up the restart).
 
 > If your repo's default branch is `master` instead of `main`, edit `.github/workflows/deploy-backend.yml` and change `branches: [main]` and `BRANCH="main"` to `master` before pushing.
 
@@ -64,7 +65,7 @@ The `.env` file is git-ignored (never committed). Create it on the server once v
 
 ```bash
 ssh -p 65022 <user>@<host>
-cd ~/domains/api.savantbd.com/app/backend
+cd ~/domains/savantbd.com/nodejs
 cp .env.example .env
 nano .env   # or use hPanel File Manager to edit
 ```
@@ -86,20 +87,20 @@ After saving `.env`, restart the app from hPanel > Node.js > Restart, or SSH in 
 The seed script writes demo products/categories/users into `backend/data/*.json`. Run it once via SSH:
 
 ```bash
-cd ~/domains/api.savantbd.com/app/backend
+cd ~/domains/savantbd.com/nodejs
 npm run seed
 ```
 
 Default seeded admin login: `admin@roseo.com` / `admin123`. **Change this immediately** after logging into the admin panel. You can re-run this any time later to reset demo data (it wipes and rebuilds).
 
 ### 1.8 Verify the backend
-Open `https://api.savantbd.com/api/health` in your browser. You should get:
+Open `https://savantbd.com/api/health` in your browser. You should get:
 ```json
 {"status":"ok","timestamp":"..."}
 ```
 
-### 1.9 SSL for the API subdomain
-hPanel > **Security** > **SSL** > issue a free Let's Encrypt cert for `api.savantbd.com`. Enable **Force HTTPS**.
+### 1.9 SSL for the apex domain
+The apex `savantbd.com` already has a Let's Encrypt cert from Hostinger (it's serving HTTPS now). No additional SSL step needed.
 
 ---
 
@@ -119,20 +120,20 @@ Project > Settings > Environment Variables. Add to **Production** and **Preview*
 
 | Variable                | Value                                   | Purpose |
 |-------------------------|-----------------------------------------|---------|
-| `BACKEND_URL`           | `https://api.savantbd.com`            | Used by `next.config.js` `rewrites()` to proxy `/api/*` from the Vercel domain to the Hostinger backend. **Recommended** because it avoids CORS. |
-| `BACKEND_HOSTNAME`      | `api.savantbd.com`                   | Lets `next/image` optimize images served from your backend's `/uploads`. |
+| `BACKEND_URL`           | `https://savantbd.com`            | Used by `next.config.js` `rewrites()` to proxy `/api/*` from the Vercel domain to the Hostinger backend. **Recommended** because it avoids CORS. |
+| `BACKEND_HOSTNAME`      | `savantbd.com`                   | Lets `next/image` optimize images served from your backend's `/uploads`. |
 | `BACKEND_PROTOCOL`      | `https`                                 | Same. |
-| `NEXT_PUBLIC_API_URL`   | **Leave unset** if you use the rewrite proxy. If you'd rather call the backend directly, set this to `https://api.savantbd.com/api` (and make sure backend CORS includes the Vercel origin). | |
+| `NEXT_PUBLIC_API_URL`   | **Leave unset** if you use the rewrite proxy. If you'd rather call the backend directly, set this to `https://savantbd.com/api` (and make sure backend CORS includes the Vercel origin). | |
 
 ### 2.4 Add your custom domain
-Vercel project > **Settings** > **Domains** > add `savantbd.com` and `www.savantbd.com`.
-Vercel shows you the DNS records to add at your registrar/hPanel DNS.
+Vercel project > **Settings** > **Domains** > add `www.savantbd.com` (primary).
+Do **not** add the apex `savantbd.com` in Vercel - that still points at Hostinger for the backend.
 
 ### 2.5 Configure DNS at Hostinger
-hPanel > **Domains** > your domain > **DNS / Nameservers**:
-
-- Add/point an **A record** or **CNAME** to the host Vercel gives you (e.g. ` cname.vercel-dns.com`).
-- The `api` subdomain stays pointing at Hostinger (either an A record to your hosting IP, or leave as the default subdomain hPanel created in step 1.2). Keep it on Hostinger.
+hPanel > **Domains** > `savantbd.com` > **DNS / Zone Editor**:
+- `www.savantbd.com` should already have a CNAME. **Change it** to point to `cname.vercel-dns.com` (Vercel will tell you the exact target when you add the domain in step 2.4).
+- Leave the apex `savantbd.com` A records untouched (they point at Hostinger and serve the backend).
+- Remove the `api.savantbd.com` A records if you don't want to keep the (unused) subdomain alive.
 
 ### 2.6 SSL
 Vercel issues the SSL cert automatically when you add the domain in 2.4 and point DNS in 2.5.
@@ -175,15 +176,15 @@ Hostinger shared plans cap CPU minutes per month and concurrent processes. For a
 
 ## Part 5 - Post-deploy checklist
 
-- [ ] `https://api.savantbd.com/api/health` returns `{"status":"ok"}` over HTTPS
-- [ ] `https://savantbd.com` loads the storefront
-- [ ] A product page like `https://savantbd.com/products/<some-id>` loads (verifies SSR rewrites to backend)
-- [ ] Admin login at `https://savantbd.com/admin/login` works with seeded creds
+- [ ] `https://savantbd.com/api/health` returns `{"status":"ok"}` over HTTPS
+- [ ] `https://www.savantbd.com` loads the storefront
+- [ ] A product page like `https://www.savantbd.com/products/<some-id>` loads (verifies SSR rewrites to backend)
+- [ ] Admin login at `https://www.savantbd.com/admin/login` works with seeded creds
 - [ ] Change the seeded admin password immediately
 - [ ] CORS: confirm the browser console shows no CORS errors when the frontend calls `/api/*`
 - [ ] Test `Forgot password` email sends and the reset link uses `FRONTEND_URL` correctly
 - [ ] Test product image upload in admin works and the image displays on the storefront
-- [ ] Back up `backend/data/` and `backend/uploads/`
+- [ ] Back up `~/domains/savantbd.com/nodejs/data/` and `~/domains/savantbd.com/nodejs/uploads/`
 
 ---
 
