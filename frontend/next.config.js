@@ -71,7 +71,7 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    const backendUrl = process.env.BACKEND_URL || 'https://api.savantbd.com';
     return [
       {
         source: '/api/:path*',
