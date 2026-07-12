@@ -23,34 +23,43 @@ jobs:
           username: ${{ secrets.HOSTINGER_SSH_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_SSH_PORT || 22 }}
-          script: |
-            set -e
-            APP_DIR="$HOME/domains/api.savantbd.com/app"
-            BRANCH="master"
+      script: |
+        set -e
+        APP_DIR="$HOME/domains/api.savantbd.com/nodejs"
+        STAGE_DIR="$HOME/.deploy_stage"
+        BRANCH="master"
 
-            if [ -d "$APP_DIR/.git" ]; then
-              echo "== Updating existing clone =="
-              cd "$APP_DIR"
-              git fetch --all --prune
-              git checkout "$BRANCH"
-              git reset --hard "origin/$BRANCH"
-            else
-              echo "== Cloning repo =="
-              mkdir -p "$APP_DIR"
-              cd "$APP_DIR"
-              git clone --branch "$BRANCH" "${{ secrets.REPO_URL }}" .
-            fi
+        echo "== Cloning/fetching repo into stage =="
+        if [ -d "$STAGE_DIR/.git" ]; then
+          cd "$STAGE_DIR"
+          git fetch --all --prune
+          git reset --hard "origin/$BRANCH"
+        else
+          rm -rf "$STAGE_DIR"
+          git clone --branch "$BRANCH" "${{ secrets.REPO_URL }}" "$STAGE_DIR"
+        fi
 
-            echo "== Installing dependencies =="
-            npm install --omit=dev
+        echo "== Syncing backend/ into app root (preserving .env/data/uploads/node_modules/tmp) =="
+        mkdir -p "$APP_DIR/data" "$APP_DIR/uploads" "$APP_DIR/tmp"
+        rsync -a --delete \
+          --exclude 'node_modules' \
+          --exclude '.env' \
+          --exclude 'data/*.json' \
+          --exclude 'uploads/*' \
+          --exclude 'tmp/*' \
+          --exclude '.git' \
+          "$STAGE_DIR/backend/" "$APP_DIR/"
 
-            echo "== Ensuring data dir exists =="
-            mkdir -p backend/data backend/uploads
-            [ -f backend/data/.gitkeep ] || touch backend/data/.gitkeep
-            [ -f backend/uploads/.gitkeep ] || touch backend/uploads/.gitkeep
+        echo "== Installing backend dependencies =="
+        cd "$APP_DIR"
+        npm install --omit=dev
 
-            echo "== Restarting Passenger app =="
-            mkdir -p tmp
-            touch tmp/restart.txt
+        echo "== Ensuring data/uploads keepers exist =="
+        [ -f data/.gitkeep ] || touch data/.gitkeep
+        [ -f uploads/.gitkeep ] || touch uploads/.gitkeep
 
-            echo "== Deploy complete =="
+        echo "== Restarting Passenger app =="
+        mkdir -p tmp
+        touch tmp/restart.txt
+
+        echo "== Deploy complete =="
