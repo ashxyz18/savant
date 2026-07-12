@@ -49,9 +49,11 @@ jobs:
             rsync -a --delete \
               --exclude 'node_modules' \
               --exclude '.env' \
-              --exclude 'data/*.json' \
-              --exclude 'uploads/*' \
-              --exclude 'tmp/*' \
+              --exclude '/data/' \
+              --exclude '/uploads/' \
+              --exclude '/tmp/' \
+              --exclude 'console.log' \
+              --exclude 'stderr.log' \
               --exclude '.git' \
               "$STAGE_DIR/backend/" "$APP_DIR/"
 
