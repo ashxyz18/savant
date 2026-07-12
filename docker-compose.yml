@@ -1,0 +1,36 @@
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file: ./backend/.env
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/roseo
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      - mongodb
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:5000/api
+      - BACKEND_URL=http://backend:5000
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
+  uploads:

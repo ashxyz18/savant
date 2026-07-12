@@ -1,0 +1,223 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+  }
+
+  * {
+    @apply border-neutral-200;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-neutral-900 antialiased;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-neutral-50;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-neutral-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-neutral-400;
+  }
+}
+
+@layer components {
+  .container {
+    @apply px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl;
+  }
+
+  .btn-primary {
+    @apply bg-neutral-900 text-white font-medium px-6 py-3 rounded-lg hover:bg-neutral-800 transition-all duration-200 active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply bg-white text-neutral-900 border border-neutral-300 font-medium px-6 py-3 rounded-lg hover:bg-neutral-50 hover:border-neutral-400 transition-all duration-200;
+  }
+
+  .btn-accent {
+    @apply bg-primary-500 text-white font-medium px-6 py-3 rounded-lg hover:bg-primary-600 transition-all duration-200 active:scale-[0.98];
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent;
+  }
+
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-md border border-white/20;
+  }
+
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all duration-200;
+  }
+
+  /* Scroll reveal animation classes */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-left {
+    opacity: 0;
+    transform: translateX(-40px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .reveal-left.revealed {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .reveal-right {
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .reveal-right.revealed {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .reveal-scale {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  }
+
+  .reveal-scale.revealed {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Stagger delay utilities for children */
+  .stagger-1 { transition-delay: 0.1s; }
+  .stagger-2 { transition-delay: 0.2s; }
+  .stagger-3 { transition-delay: 0.3s; }
+  .stagger-4 { transition-delay: 0.4s; }
+  .stagger-5 { transition-delay: 0.5s; }
+  .stagger-6 { transition-delay: 0.6s; }
+
+  /* Marquee animation for brand logos */
+  .marquee-container {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .marquee-container::before,
+  .marquee-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 80px;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .marquee-container::before {
+    left: 0;
+    background: linear-gradient(to right, white, transparent);
+  }
+
+  .marquee-container::after {
+    right: 0;
+    background: linear-gradient(to left, white, transparent);
+  }
+
+  .marquee-track {
+    display: flex;
+    animation: marquee 30s linear infinite;
+    width: max-content;
+  }
+
+  .marquee-track:hover {
+    animation-play-state: paused;
+  }
+
+  /* Shimmer loading effect */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(128, 128, 128, 0.05) 25%,
+      rgba(128, 128, 128, 0.12) 50%,
+      rgba(128, 128, 128, 0.05) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  /* Tilt card effect */
+  .tilt-card {
+    transform-style: preserve-3d;
+    transition: transform 0.15s ease-out;
+  }
+
+  .tilt-card .tilt-content {
+    transform: translateZ(20px);
+  }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  .animate-bounce-in {
+    animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .animate-slide-in-bottom {
+    animation: slideInBottom 0.4s ease-out;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Gradient text utility */
+  .text-gradient-primary {
+    @apply bg-gradient-to-r from-primary-800 to-primary-600 bg-clip-text text-transparent;
+  }
+}
