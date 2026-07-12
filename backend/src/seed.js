@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import User from './models/User.js';
@@ -23,8 +22,7 @@ const generateSKU = (category, count) => {
 
 const seedDatabase = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('MongoDB connected for seeding');
+    console.log('Seeding database...');
 
     // Clear existing data
     await User.deleteMany({});

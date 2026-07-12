@@ -5,7 +5,7 @@ import api from '../../../lib/api';
 import { Plus, Edit3, Trash2, X, Upload, Tags, ToggleLeft, ToggleRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const UPLOAD_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace('/api', '');
+const UPLOAD_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://api.savantbd.com/api').replace('/api', '');
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState([]);

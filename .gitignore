@@ -5,4 +5,7 @@ node_modules/
 uploads/*
 backend/uploads/*
 !backend/uploads/.gitkeep
+backend/data/*
+!backend/data/.gitkeep
 *.log
+.kilo/

@@ -1,0 +1,56 @@
+name: Deploy backend to Hostinger
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH deploy to Hostinger
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_SSH_HOST }}
+          username: ${{ secrets.HOSTINGER_SSH_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_SSH_PORT || 22 }}
+          script: |
+            set -e
+            APP_DIR="$HOME/domains/api.savantbd.com/app"
+            BRANCH="master"
+
+            if [ -d "$APP_DIR/.git" ]; then
+              echo "== Updating existing clone =="
+              cd "$APP_DIR"
+              git fetch --all --prune
+              git checkout "$BRANCH"
+              git reset --hard "origin/$BRANCH"
+            else
+              echo "== Cloning repo =="
+              mkdir -p "$APP_DIR"
+              cd "$APP_DIR"
+              git clone --branch "$BRANCH" "${{ secrets.REPO_URL }}" .
+            fi
+
+            echo "== Installing dependencies =="
+            npm install --omit=dev
+
+            echo "== Ensuring data dir exists =="
+            mkdir -p backend/data backend/uploads
+            [ -f backend/data/.gitkeep ] || touch backend/data/.gitkeep
+            [ -f backend/uploads/.gitkeep ] || touch backend/uploads/.gitkeep
+
+            echo "== Restarting Passenger app =="
+            mkdir -p tmp
+            touch tmp/restart.txt
+
+            echo "== Deploy complete =="

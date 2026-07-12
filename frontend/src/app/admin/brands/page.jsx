@@ -5,7 +5,7 @@ import api from '../../../lib/api';
 import { Plus, Pencil, Trash2, Upload, X, Globe, Eye, EyeOff, GripVertical } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const UPLOAD_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace('/api', '');
+const UPLOAD_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://api.savantbd.com/api').replace('/api', '');
 
 export default function AdminBrandsPage() {
   const [brands, setBrands] = useState([]);

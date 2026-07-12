@@ -1,50 +1,44 @@
 import multer from 'multer';
-import { v2 as cloudinary } from 'cloudinary';
-import stream from 'stream';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const uploadDir = path.join(__dirname, '..', '..', 'uploads');
+
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname) || '.png';
+    const name = `img-${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`;
+    cb(null, name);
+  },
 });
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|webp|gif/;
-  const mimetype = allowedTypes.test(file.mimetype);
-  if (mimetype) {
+  if (allowedTypes.test(file.mimetype)) {
     return cb(null, true);
-  } else {
-    cb(new Error('Only image files are allowed'));
   }
+  cb(new Error('Only image files are allowed'));
 };
-
-const uploadToCloudinary = (file) => {
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: 'roseo', transformation: [{ quality: 'auto', fetch_format: 'auto' }] },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      }
-    );
-    const bufferStream = new stream.PassThrough();
-    bufferStream.end(file.buffer);
-    bufferStream.pipe(uploadStream);
-  });
-};
-
-const memoryStorage = multer.memoryStorage();
 
 export const upload = multer({
-  storage: memoryStorage,
+  storage,
   fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
 export const uploadMultiple = multer({
-  storage: memoryStorage,
+  storage,
   fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 },
 }).array('images', 5);
 
-export { uploadToCloudinary };
+// Returns a URL path served statically from /uploads
+export const uploadToCloudinary = (file) => {
+  return Promise.resolve({ secure_url: `/uploads/${file.filename}` });
+};
