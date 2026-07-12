@@ -25,9 +25,14 @@ jobs:
           port: ${{ secrets.HOSTINGER_SSH_PORT || 22 }}
           script: |
             set -e
+            export PATH="/opt/alt/alt-nodejs22/root/bin:$PATH"
             APP_DIR="$HOME/domains/api.savantbd.com/nodejs"
             STAGE_DIR="$HOME/.deploy_stage"
             BRANCH="master"
+
+            echo "== Versions =="
+            node -v
+            npm -v
 
             echo "== Cloning/fetching repo into stage =="
             if [ -d "$STAGE_DIR/.git" ]; then
