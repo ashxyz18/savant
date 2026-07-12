@@ -22,8 +22,15 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Middleware
+// Split comma-separated FRONTEND_URL into an array so the cors middleware
+// echoes a single, valid Access-Control-Allow-Origin per request. Sending a
+// comma-joined string is rejected by browsers ("Failed to fetch").
+const allowedOrigins = (process.env.FRONTEND_URL || '*')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: allowedOrigins.length === 1 ? allowedOrigins[0] : allowedOrigins,
   credentials: true,
 }));
 app.use(express.json());
