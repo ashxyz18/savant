@@ -65,6 +65,12 @@ jobs:
             [ -f data/.gitkeep ] || touch data/.gitkeep
             [ -f uploads/.gitkeep ] || touch uploads/.gitkeep
 
+            echo "== Ensuring .env is present (restore from .env.example if missing) =="
+            if [ ! -f .env ]; then
+              echo "WARNING: .env missing - restoring from .env.example. Edit it to add a real JWT_SECRET and SMTP credentials!"
+              cp .env.example .env
+            fi
+
             echo "== Restarting Passenger app =="
             mkdir -p tmp
             touch tmp/restart.txt
