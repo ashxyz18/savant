@@ -23,43 +23,43 @@ jobs:
           username: ${{ secrets.HOSTINGER_SSH_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_SSH_PORT || 22 }}
-      script: |
-        set -e
-        APP_DIR="$HOME/domains/api.savantbd.com/nodejs"
-        STAGE_DIR="$HOME/.deploy_stage"
-        BRANCH="master"
+          script: |
+            set -e
+            APP_DIR="$HOME/domains/api.savantbd.com/nodejs"
+            STAGE_DIR="$HOME/.deploy_stage"
+            BRANCH="master"
 
-        echo "== Cloning/fetching repo into stage =="
-        if [ -d "$STAGE_DIR/.git" ]; then
-          cd "$STAGE_DIR"
-          git fetch --all --prune
-          git reset --hard "origin/$BRANCH"
-        else
-          rm -rf "$STAGE_DIR"
-          git clone --branch "$BRANCH" "${{ secrets.REPO_URL }}" "$STAGE_DIR"
-        fi
+            echo "== Cloning/fetching repo into stage =="
+            if [ -d "$STAGE_DIR/.git" ]; then
+              cd "$STAGE_DIR"
+              git fetch --all --prune
+              git reset --hard "origin/$BRANCH"
+            else
+              rm -rf "$STAGE_DIR"
+              git clone --branch "$BRANCH" "${{ secrets.REPO_URL }}" "$STAGE_DIR"
+            fi
 
-        echo "== Syncing backend/ into app root (preserving .env/data/uploads/node_modules/tmp) =="
-        mkdir -p "$APP_DIR/data" "$APP_DIR/uploads" "$APP_DIR/tmp"
-        rsync -a --delete \
-          --exclude 'node_modules' \
-          --exclude '.env' \
-          --exclude 'data/*.json' \
-          --exclude 'uploads/*' \
-          --exclude 'tmp/*' \
-          --exclude '.git' \
-          "$STAGE_DIR/backend/" "$APP_DIR/"
+            echo "== Syncing backend/ into app root (preserving .env/data/uploads/node_modules/tmp) =="
+            mkdir -p "$APP_DIR/data" "$APP_DIR/uploads" "$APP_DIR/tmp"
+            rsync -a --delete \
+              --exclude 'node_modules' \
+              --exclude '.env' \
+              --exclude 'data/*.json' \
+              --exclude 'uploads/*' \
+              --exclude 'tmp/*' \
+              --exclude '.git' \
+              "$STAGE_DIR/backend/" "$APP_DIR/"
 
-        echo "== Installing backend dependencies =="
-        cd "$APP_DIR"
-        npm install --omit=dev
+            echo "== Installing backend dependencies =="
+            cd "$APP_DIR"
+            npm install --omit=dev
 
-        echo "== Ensuring data/uploads keepers exist =="
-        [ -f data/.gitkeep ] || touch data/.gitkeep
-        [ -f uploads/.gitkeep ] || touch uploads/.gitkeep
+            echo "== Ensuring data/uploads keepers exist =="
+            [ -f data/.gitkeep ] || touch data/.gitkeep
+            [ -f uploads/.gitkeep ] || touch uploads/.gitkeep
 
-        echo "== Restarting Passenger app =="
-        mkdir -p tmp
-        touch tmp/restart.txt
+            echo "== Restarting Passenger app =="
+            mkdir -p tmp
+            touch tmp/restart.txt
 
-        echo "== Deploy complete =="
+            echo "== Deploy complete =="
