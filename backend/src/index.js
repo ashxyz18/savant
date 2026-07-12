@@ -62,15 +62,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message || 'Internal server error' });
 });
 
-// Start the server only when this file is executed directly (e.g. `npm start` / `node src/index.js`).
-// When imported by the Passenger entry file (app.js) or tests, do not bind a port;
-// Passenger connects to it via the exported app instead.
-const isMainModule = process.argv[1] && path.resolve(process.argv[1]) === __filename;
-if (isMainModule) {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}
+// Start the server. On Hostinger Node.js (LSNODE), the entry file MUST call
+// app.listen() unconditionally — guarding with `require.main === module` or
+// import.meta checks is not supported and will cause a startup timeout (503).
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 export default app;
