@@ -2,6 +2,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { cloudinary, isCloudinaryConfigured } from '../lib/cloudinary.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,7 +39,22 @@ export const uploadMultiple = multer({
   limits: { fileSize: 10 * 1024 * 1024 },
 }).array('images', 5);
 
-// Returns a URL path served statically from /uploads
+// Uploads the saved file to Cloudinary when configured, returning a
+// persistent HTTPS URL. Falls back to the local /uploads path (ephemeral on
+// Render) when Cloudinary env vars are absent, so uploads never hard-fail.
 export const uploadToCloudinary = (file) => {
-  return Promise.resolve({ secure_url: `/uploads/${file.filename}` });
+  if (!file) return Promise.resolve({ secure_url: '' });
+
+  if (!isCloudinaryConfigured) {
+    return Promise.resolve({ secure_url: `/uploads/${file.filename}` });
+  }
+
+  return cloudinary.uploader
+    .upload(file.path, { folder: 'savant', resource_type: 'auto' })
+    .then((result) => {
+      // Remove the temporary local copy so the ephemeral disk doesn't fill up.
+      fs.unlink(file.path, () => {});
+      return { secure_url: result.secure_url };
+    })
+    .catch(() => ({ secure_url: `/uploads/${file.filename}` }));
 };
