@@ -17,10 +17,16 @@ const poppins = Poppins({
   preload: false,
 })
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.NEXT_PUBLIC_API_URL
+    ? new URL(process.env.NEXT_PUBLIC_API_URL).origin
+    : 'http://localhost:3000');
+
 export const metadata = {
   title: 'SAVANT | Premium Leather Bags',
   description: 'Discover premium leather bags crafted with precision and timeless design.',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'),
+  metadataBase: new URL(siteUrl),
   openGraph: {
     title: 'SAVANT | Premium Leather Bags',
     description: 'Discover premium leather bags crafted with precision and timeless design.',
