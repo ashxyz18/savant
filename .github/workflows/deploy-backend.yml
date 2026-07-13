@@ -71,7 +71,19 @@ jobs:
               cp .env.example .env
             fi
 
-            echo "== Restarting Passenger app =="
+            echo "== Ensuring FRONTEND_URL allows production origins (CORS) =="
+            FRONTEND_URL_VAL="https://savantbd.com,https://www.savantbd.com,https://api.savantbd.com,http://localhost:3000"
+            if grep -q '^FRONTEND_URL=' .env; then
+              sed -i "s|^FRONTEND_URL=.*|FRONTEND_URL=${FRONTEND_URL_VAL}|" .env
+            else
+              echo "FRONTEND_URL=${FRONTEND_URL_VAL}" >> .env
+            fi
+
+            echo "== Restarting Node app (force kill stale process + Passenger restart) =="
+            pkill -f "nodejs/app.js" 2>/dev/null || true
+            pkill -f "nodejs/src/index.js" 2>/dev/null || true
+            pkill -f "node app.js" 2>/dev/null || true
+            sleep 3
             mkdir -p tmp
             touch tmp/restart.txt
 
