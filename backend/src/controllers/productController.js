@@ -22,8 +22,14 @@ export const getProducts = async (req, res) => {
     if (category) filter.category = category;
     if (subcategory) filter.subcategory = subcategory;
     if (featured === 'true') filter.featured = true;
-    if (isActive !== undefined) filter.isActive = isActive === 'true';
-    else filter.isActive = true;
+    // `isActive` from the admin panel is sent as `null` (no filter). Treat
+    // 'true'/'false' as explicit states, 'null'/'all'/'' as "show all", and
+    // undefined (storefront) as active-only by default.
+    if (isActive === 'true') filter.isActive = true;
+    else if (isActive === 'false') filter.isActive = false;
+    else if (isActive === 'null' || isActive === 'all' || isActive === '') {
+      // no isActive filter — show active and inactive
+    } else filter.isActive = true;
 
     if (minPrice || maxPrice) {
       filter.price = {};
