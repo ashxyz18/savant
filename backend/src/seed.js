@@ -406,17 +406,6 @@ const seedDatabase = async () => {
     // Create banners
     const banners = await Banner.create([
       {
-        title: 'New Collection 2024',
-        subtitle: 'Timeless by Design',
-        description: 'Discover our premium leather bag collection where craftsmanship meets contemporary design.',
-        image: '/uploads/banner-hero.jpg',
-        link: '/collections/new',
-        buttonText: 'Shop Now',
-        position: 'hero',
-        isActive: true,
-        sortOrder: 1,
-      },
-      {
         title: 'Summer Sale',
         subtitle: 'Up to 30% Off',
         description: 'Special offers on selected items. Limited time only.',
