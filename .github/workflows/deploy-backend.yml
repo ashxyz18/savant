@@ -80,10 +80,10 @@ jobs:
             fi
 
             echo "== Restarting Node app (force kill stale process + Passenger restart) =="
-            pkill -f "nodejs/app.js" 2>/dev/null || true
-            pkill -f "nodejs/src/index.js" 2>/dev/null || true
+            pkill -f "src/index.js" 2>/dev/null || true
             pkill -f "node app.js" 2>/dev/null || true
-            sleep 3
+            pkill -f "Passenger" 2>/dev/null || true
+            sleep 4
             mkdir -p tmp
             touch tmp/restart.txt
 
