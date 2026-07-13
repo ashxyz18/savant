@@ -9,3 +9,6 @@ backend/data/*
 !backend/data/.gitkeep
 *.log
 .kilo/
+
+backend.zip
+*-deploy.zip

@@ -1,121 +1,105 @@
-# Deploying SAVANT (frontend on Hostinger, backend on Render)
+# Deploying SAVANT — Render (backend) + Vercel (frontend) + Hostinger (domain)
 
-## Architecture (this plan)
+## Architecture
+| Piece | Service | Notes |
+|-------|---------|-------|
+| Frontend (Next.js) | **Vercel** | Connect the GitHub repo; Vercel builds & serves it (SSR). |
+| Backend (Express API) | **Render** | Web service; listens on `$PORT`, serves `/api/*`. |
+| Database | **MongoDB Atlas** | Set via `MONGODB_URI` (Mongoose). Persists across deploys. |
+| Domain | **Hostinger** | You only use Hostinger for the domain — point its DNS at Vercel. |
 
-| Piece                    | Host                         | Why |
-|--------------------------|------------------------------|-----|
-| Frontend (Next.js)       | **Hostinger "Web Hosting Unlimited"** (`public_html`) | Shared hPanel is Apache-only and **cannot run `next start`**. We build a fully **static export** (`next build` -> `out/`) and upload it. All data is fetched client-side from the API, so the store works as static files. |
-| Backend (Express API)    | **Render** (web service)     | Render runs a real Node.js server. The Express app listens on the injected `PORT` and serves `/api/*` + uploaded files. |
-| Database                 | **MongoDB Atlas** (Mongoose)  | Set via `MONGODB_URI`. Data persists across Render restarts/deploys. |
-| User uploads             | `backend/uploads/` on Render (ephemeral) | Files are wiped on redeploy — switch to Cloudinary or a Render disk for permanent storage (see caveats). |
+```
+Browser ─HTTPS─▶ Vercel (www.yourdomain.com) ──▶ calls /api ──▶ Render (api.onrender.com)
+                                   │                                  │
+                              Hostinger DNS                    MongoDB Atlas
+```
 
-> `NEXT_PUBLIC_API_URL` (frontend) points directly at the Render backend, so no server-side proxy/rewrite is used — that's why static hosting works.
+> `NEXT_PUBLIC_API_URL` (frontend, build-time) points at the Render backend, so
+> the browser calls Render directly. CORS is handled by the backend's
+> `FRONTEND_URL` (your domain). No server-side proxy is needed.
 
 ---
 
-## Part 1 - Backend on Render
-
-1. **Create the service**
-   - Render dashboard -> **New** -> **Blueprint** and connect the GitHub repo (uses `render.yaml`), **or**
-   - **New** -> **Web Service** -> connect repo, then set:
-     - **Root directory:** `backend`
-     - **Runtime:** Node
-     - **Build command:** `npm install`
-     - **Start command:** `node src/index.js`
-     - **Health check path:** `/api/health`
-     - **Plan:** Free (or paid if you need a persistent disk — see caveats)
-     - **Branch:** `master`
-
-2. **Environment variables** (Render dashboard -> Environment):
+## Part 1 — Backend on Render
+1. Render dashboard → **New → Blueprint**, connect the GitHub repo (uses
+   `render.yaml`), **or** create a **Web Service** manually:
+   - **Root directory:** `backend`
+   - **Build:** `npm install`  **Start:** `node src/index.js`
+   - **Health check:** `/api/health`
+2. **Environment variables** (Render → Environment):
    | Key | Value |
    |-----|-------|
    | `NODE_ENV` | `production` |
-   | `PORT` | *(leave unset — Render injects it)* |
-   | `FRONTEND_URL` | `https://your-hostinger-domain.com` (CORS allow-list; comma-separated for multiple) |
-   | `JWT_SECRET` | `openssl rand -hex 32` output (a long random string) |
-   | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | Your email provider (Brevo/SendGrid/Gmail) |
-    | `MONGODB_URI` | **REQUIRED** — your MongoDB Atlas connection string (`mongodb+srv://...`). The app uses Mongoose, so data persists across deploys. |
-    | `CLOUDINARY_*` | only if you enable Cloudinary uploads (see caveats) |
+   | `MONGODB_URI` | MongoDB Atlas connection string (**required**) |
+   | `JWT_SECRET` | `openssl rand -hex 32` |
+   | `FRONTEND_URL` | `https://www.yourdomain.com` (CORS allow-list) |
+   | `SMTP_*` | email provider |
+3. Deploy. Open `https://<render-url>/api/health` → `{"status":"ok"}`.
+4. **Seed** (first time): Render service → **Shell** → `npm run seed`.
+   Admin: `admin@roseo.com` / `admin123` — change it after login.
 
-3. **Deploy & verify**
-   - Click **Deploy**. Once live, open `https://<render-url>/api/health` -> `{"status":"ok",...}`.
-
-4. **Seed initial data** (first time only)
-   - Open the Render service -> **Shell** and run `npm run seed`.
-   - Default admin: `admin@roseo.com` / `admin123` — **change it immediately** in the admin panel.
-   - Note: on the Free plan the disk is wiped on each deploy, so you'll need to re-seed after redeploys (or use the persistent-disk / MongoDB options in caveats).
+(The app auto-seeds on first run too, so manual seed is optional.)
 
 ---
 
-## Part 2 - Frontend on Hostinger (static export)
+## Part 2 — Frontend on Vercel
+1. Vercel dashboard → **Add New → Project** → import the GitHub repo.
+2. **Settings:**
+   - **Root Directory:** `frontend`
+   - **Framework:** Next.js (auto-detected)
+   - **Build Command:** `npm run build`  **Output:** `.next` (default)
+3. **Environment Variables** (Project → Settings → Environment):
+   | Key | Value |
+   |-----|-------|
+   | `NEXT_PUBLIC_API_URL` | `https://<your-render-url>/api` |
+4. **Deploy**. Vercel gives `https://<project>.vercel.app`.
 
-### 2.1 Build locally (or in CI)
-From the repo root:
-
-```powershell
-$env:NEXT_PUBLIC_API_URL = "https://<your-render-backend-url>/api"
-cd frontend
-npm install
-npm run build      # outputs ./out
-```
-
-This produces a static site in `frontend/out/`. The product page is now a static route
-`/products/view/?id=<id>` (so new products work without a rebuild).
-
-### 2.2 Upload to Hostinger
-1. hPanel -> **Hosting** -> **File Manager** -> open `public_html`.
-2. Delete the default `index.html` / `default.php` if present.
-3. Upload **everything inside `frontend/out/`** into `public_html` (keep the folder structure: `index.html`, `_next/`, `products/`, etc.).
-   - Or use FTP. You can zip `out/`, upload, and extract in `public_html`.
-4. Upload the sample `.htaccess` from `deploy/hostinger.htaccess` into `public_html` (rename to `.htaccess`).
-
-### 2.3 Domain / DNS
-- Point your domain's A record (or Hostinger's default) at the hosting. The frontend is served from the apex/`www` as static files — no backend proxy needed.
-- Make sure `NEXT_PUBLIC_API_URL` (the Render URL) is reachable from the browser; CORS is handled by the backend's `FRONTEND_URL`.
-
-### 2.4 (Optional) Automate rebuilds
-Hostinger shared hosting has no build pipeline. Rebuild locally and re-upload `out/` whenever you change frontend code. (Render auto-redeploys the backend on git push if you connected the repo.)
+Any push to `frontend/**` (or `master`) redeploys automatically.
 
 ---
 
-## Part 3 - Email (optional but needed for chat / forgot-password)
+## Part 3 — Point the Hostinger domain at Vercel
+1. Vercel → Project → **Settings → Domains** → add `www.yourdomain.com` and
+   `yourdomain.com`. Vercel shows the DNS records to create.
+2. In **Hostinger hPanel → DNS Zone** for the domain, add the records Vercel
+   lists, typically:
+   - `www` → CNAME → `cname.vercel-dns.com` (or the value Vercel shows)
+   - `@` (apex) → A / AAAA records Vercel provides (or use Vercel's
+     nameservers if you prefer).
+3. Wait for DNS propagation (~minutes–hours). Vercel issues a free TLS cert
+   automatically.
 
-Backend uses `nodemailer`. Set the `SMTP_*` vars on Render (Part 1.2). A transactional SMTP (Brevo, SendGrid) is recommended over Gmail.
-
----
-
-## Part 4 - Caveats you MUST know
-
-### Database now persists (MongoDB Atlas)
-The data layer uses Mongoose against **MongoDB Atlas**, so products, orders, users, etc. survive Render restarts/deploys. Set `MONGODB_URI` on Render (and locally in `backend/.env`). The old local JSON file store is gone. Seed once with `npm run seed` (Render Shell) — you do **not** need to re-seed after redeploys.
-
-### Uploads are still ephemeral on Render
-`backend/uploads/` lives on Render's disposable disk, so product images uploaded in the admin panel are wiped on each deploy. For permanent storage, enable **Cloudinary** (the `cloudinary` dep is already installed): set `CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET` and switch `backend/src/middleware/upload.js` to Cloudinary storage. Until then, re-upload images after redeploys or use a Render persistent disk mounted at `/app/uploads`.
-
-### Images are unoptimized
-`next.config.js` sets `images.unoptimized: true` because there is no image server on static hosting. Product images are served straight from the Render backend's `/uploads`, so those URLs must be reachable (and CORS/`FRONTEND_URL` correct).
-
-### Product URLs changed
-Old: `/products/<id>` (server route). New: `/products/view/?id=<id>` (static). Search engines / old bookmarks to the old format will 404 — add redirects in `.htaccess` if you had them indexed.
-
-### No server-side rendering
-The store is a client-rendered SPA. SEO for product pages is weaker than the old SSR setup; acceptable for this hosting constraint.
+Now `https://www.yourdomain.com` serves the storefront and calls the Render API.
 
 ---
 
-## Part 5 - Post-deploy checklist
-- [ ] `https://<render>/api/health` returns `{"status":"ok"}`
-- [ ] `https://<hostinger-domain>` loads the storefront
-- [ ] A product opens at `https://<hostinger-domain>/products/view/?id=<some-id>`
-- [ ] Admin login works with seeded creds; **change the admin password**
-- [ ] No CORS errors in the browser console when the frontend calls the API
-- [ ] Forgot-password email sends and the reset link uses `FRONTEND_URL`
-- [ ] Product image upload works and displays (see storage caveat)
-- [ ] Back up `backend/data/` and `backend/uploads/` if using a persistent disk
+## Part 4 — Environment recap
+| Where | Variable | Value |
+|-------|----------|-------|
+| Render | `MONGODB_URI` | Atlas connection string |
+| Render | `FRONTEND_URL` | `https://www.yourdomain.com` |
+| Render | `JWT_SECRET`, `SMTP_*` | as before |
+| Vercel | `NEXT_PUBLIC_API_URL` | `https://<render-url>/api` |
+
+## Caveats
+- **Uploads** on Render are on ephemeral storage — wiped on each deploy (like
+  before). For permanent storage use Cloudinary (dep present) or a Render
+  persistent disk.
+- **Render free plan** spins the service down when idle; first request after
+  idle is slow. Upgrade for production.
+- The **database is Atlas**, independent of Render — data persists.
+- Hostinger is used **only for the domain**; nothing is hosted there.
+
+## Post-deploy checklist
+- [ ] `https://<render>/api/health` → `{"status":"ok"}`
+- [ ] `https://www.yourdomain.com` loads the storefront
+- [ ] A product opens and displays images (from Render `/uploads`)
+- [ ] Admin login works; change the admin password
+- [ ] No CORS errors in the browser console
+- [ ] Forgot-password email sends
 
 ---
 
-## Local dev (unchanged)
-Backend: `cd backend && npm install && npm run dev` (PORT 5000)
-Frontend: `cd frontend && npm install && npm run dev` (proxies `/api` to `http://localhost:5000`)
-Set `NEXT_PUBLIC_API_URL=http://localhost:5000/api` for local frontend dev if needed.
+## Alternative / earlier AWS docs
+`deploy/aws.md`, `deploy/aws-eb.md`, `deploy/aws-amplify.md` cover EC2 /
+Elastic Beanstalk / Amplify setups if you ever switch hosting.
