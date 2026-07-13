@@ -71,7 +71,7 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    const backendUrl = process.env.BACKEND_URL || 'https://api.savantbd.com';
+    const backendUrl = process.env.BACKEND_URL || 'https://api.savant.com';
     return [
       {
         source: '/api/:path*',

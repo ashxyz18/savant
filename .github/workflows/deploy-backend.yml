@@ -76,7 +76,7 @@ jobs:
             grep -c "mongoose" src/controllers/productController.js || true
 
             echo "== Ensuring FRONTEND_URL allows production origins (CORS) =="
-            FRONTEND_URL_VAL="https://savantbd.com,https://www.savantbd.com,https://api.savantbd.com,http://localhost:3000"
+            FRONTEND_URL_VAL="https://savantbd.com,https://www.savantbd.com,https://api.savant.com,http://localhost:3000"
             # Remove any existing FRONTEND_URL line(s) (incl. stray duplicates) then append one.
             sed -i '/^[[:space:]]*FRONTEND_URL[[:space:]]*=/d' .env
             echo "FRONTEND_URL=${FRONTEND_URL_VAL}" >> .env

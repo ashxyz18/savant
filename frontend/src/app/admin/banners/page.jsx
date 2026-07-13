@@ -5,7 +5,7 @@ import api from '../../../lib/api';
 import { Plus, Edit3, Trash2, X, Upload, Image, ToggleLeft, ToggleRight, Calendar, Link, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const UPLOAD_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://api.savantbd.com/api').replace('/api', '');
+const UPLOAD_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://api.savant.com/api').replace('/api', '');
 
 const POSITIONS = [
   { value: 'hero', label: 'Hero Banner' },

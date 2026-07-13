@@ -133,7 +133,7 @@ Do **not** add the apex `savantbd.com` in Vercel - that still points at Hostinge
 hPanel > **Domains** > `savantbd.com` > **DNS / Zone Editor**:
 - `www.savantbd.com` should already have a CNAME. **Change it** to point to `cname.vercel-dns.com` (Vercel will tell you the exact target when you add the domain in step 2.4).
 - Leave the apex `savantbd.com` A records untouched (they point at Hostinger and serve the backend).
-- Remove the `api.savantbd.com` A records if you don't want to keep the (unused) subdomain alive.
+- The backend now runs on the `api.savant.com` subdomain (point its A/CNAME record at the Hostinger Node.js app). Update the frontend's `NEXT_PUBLIC_API_URL` (Vercel) to `https://api.savant.com/api` and `BACKEND_URL` to `https://api.savant.com`.
 
 ### 2.6 SSL
 Vercel issues the SSL cert automatically when you add the domain in 2.4 and point DNS in 2.5.
