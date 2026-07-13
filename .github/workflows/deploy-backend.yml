@@ -86,12 +86,8 @@ jobs:
             echo "== DIAGNOSTIC: .env FRONTEND_URL =="
             grep -i "FRONTEND_URL" .env || echo "no FRONTEND_URL line"
 
-            echo "== Restarting Node app (kill ALL node procs + Passenger restart) =="
-            pkill -9 node 2>/dev/null || true
-            sleep 5
+            echo "== Restarting Node app (update entry-file mtime + Passenger restart) =="
+            touch app.js src/index.js
             mkdir -p tmp
             touch tmp/restart.txt
-            echo "== Post-kill node procs =="
-            ps -eo pid,ppid,cmd | grep -i node | grep -v grep || echo "no node procs"
-
             echo "== Deploy complete =="
