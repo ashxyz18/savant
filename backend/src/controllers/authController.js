@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import User from '../models/User.js';
-import { sendPasswordResetEmail } from '../utils/email.js';
+import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/email.js';
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -20,7 +20,25 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: 'Email already registered' });
     }
 
-    const user = await User.create({ name, email, password });
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const user = await User.create({
+      name,
+      email,
+      password,
+      isEmailVerified: false,
+      emailVerificationToken: crypto.createHash('sha256').update(verificationToken).digest('hex'),
+      emailVerificationExpires: Date.now() + 24 * 3600000, // 24 hours
+    });
+
+    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').split(',')[0];
+    const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
+
+    try {
+      await sendVerificationEmail(email, verificationUrl);
+    } catch (emailError) {
+      console.error('Verification email failed to send:', emailError.message);
+    }
+
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -30,8 +48,10 @@ export const register = async (req, res) => {
         email: user.email,
         role: user.role,
         avatar: user.avatar,
+        isEmailVerified: user.isEmailVerified,
       },
       token,
+      message: 'Registration successful. Please check your email to verify your account.',
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -55,6 +75,16 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: 'Account is deactivated' });
     }
 
+    // Block only explicitly-unverified accounts. Seeded/legacy users without
+    // the flag are treated as verified (see User model hashPassword hook).
+    if (user.isEmailVerified === false) {
+      return res.status(403).json({
+        message: 'Please verify your email address before signing in.',
+        needsVerification: true,
+        email: user.email,
+      });
+    }
+
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -69,6 +99,7 @@ export const login = async (req, res) => {
         email: user.email,
         role: user.role,
         avatar: user.avatar,
+        isEmailVerified: user.isEmailVerified,
       },
       token,
     });
@@ -169,6 +200,69 @@ export const resetPassword = async (req, res) => {
       message: 'Password reset successful',
       token: jwtToken,
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const verifyEmail = async (req, res) => {
+  try {
+    const token = req.query.token || req.body.token;
+    if (!token) {
+      return res.status(400).json({ message: 'Verification token is required' });
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await User.findOne({
+      emailVerificationToken: hashedToken,
+      emailVerificationExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Verification token is invalid or has expired' });
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = null;
+    user.emailVerificationExpires = null;
+    await user.save();
+
+    res.json({ message: 'Email verified successfully. You can now sign in.', verified: true });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const resendVerification = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'Please provide your email' });
+    }
+
+    // Always return the same message to avoid leaking which emails exist.
+    const safeMessage = 'If an account exists for this email and is unverified, a verification link has been sent.';
+
+    const user = await User.findOne({ email });
+    if (!user || user.isEmailVerified) {
+      return res.json({ message: safeMessage });
+    }
+
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    user.emailVerificationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
+    user.emailVerificationExpires = Date.now() + 24 * 3600000;
+    await user.save({ validateBeforeSave: false });
+
+    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').split(',')[0];
+    const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
+
+    try {
+      await sendVerificationEmail(email, verificationUrl);
+    } catch (emailError) {
+      console.error('Verification email failed to send:', emailError.message);
+    }
+
+    res.json({ message: safeMessage });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

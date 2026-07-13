@@ -21,15 +21,16 @@ export const getProducts = async (req, res) => {
 
     if (category) filter.category = category;
     if (subcategory) filter.subcategory = subcategory;
-    if (featured === 'true') filter.featured = true;
+    if (featured === 'true') filter.featured = { $in: [true, 'true'] };
     // `isActive` from the admin panel is sent as `null` (no filter). Treat
     // 'true'/'false' as explicit states, 'null'/'all'/'' as "show all", and
-    // undefined (storefront) as active-only by default.
-    if (isActive === 'true') filter.isActive = true;
-    else if (isActive === 'false') filter.isActive = false;
+    // undefined (storefront) as active-only by default. Accept both boolean
+    // and string forms since FormData serializes booleans to strings.
+    if (isActive === 'true') filter.isActive = { $in: [true, 'true'] };
+    else if (isActive === 'false') filter.isActive = { $in: [false, 'false'] };
     else if (isActive === 'null' || isActive === 'all' || isActive === '') {
       // no isActive filter — show active and inactive
-    } else filter.isActive = true;
+    } else filter.isActive = { $in: [true, 'true'] };
 
     if (minPrice || maxPrice) {
       filter.price = {};
@@ -105,9 +106,26 @@ export const generateSKU = async (category = 'GEN') => {
   return `${prefix}-${seq}-${random}`;
 };
 
+const coerceProductFields = (data) => {
+  // FormData serializes booleans/numbers to strings. Normalize so storefront
+  // filters (which compare against real booleans/numbers) match correctly.
+  if (data.isActive !== undefined) data.isActive = data.isActive === true || data.isActive === 'true';
+  if (data.featured !== undefined) data.featured = data.featured === true || data.featured === 'true';
+  if (data.fastShipping !== undefined) data.fastShipping = data.fastShipping === true || data.fastShipping === 'true';
+  if (data.price !== undefined && data.price !== '') data.price = Number(data.price);
+  if (data.originalPrice !== undefined && data.originalPrice !== '') data.originalPrice = Number(data.originalPrice);
+  if (data.stock !== undefined && data.stock !== '') data.stock = Number(data.stock);
+  if (data.colorCount !== undefined && data.colorCount !== '') data.colorCount = Number(data.colorCount);
+  if (data.rating !== undefined && data.rating !== '') data.rating = Number(data.rating);
+  if (data.reviewCount !== undefined && data.reviewCount !== '') data.reviewCount = Number(data.reviewCount);
+  // New products default to active so they appear in the storefront.
+  if (data.isActive === undefined) data.isActive = true;
+  return data;
+};
+
 export const createProduct = async (req, res) => {
   try {
-    const productData = { ...req.body };
+    const productData = coerceProductFields({ ...req.body });
 
     // Generate slug from name
     productData.slug = productData.name
@@ -155,7 +173,7 @@ export const createProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
-    const productData = { ...req.body };
+    const productData = coerceProductFields({ ...req.body });
 
     // Regenerate slug if name changed
     if (productData.name) {

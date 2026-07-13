@@ -19,19 +19,19 @@ const getTransporter = async () => {
 export const sendPasswordResetEmail = async (email, resetUrl) => {
   const settings = await SiteSettings.getSingleton();
   const smtp = settings.smtp || {};
-  const fromEmail = smtp.fromEmail || process.env.SMTP_USER || 'roseobd@mail.com';
-  const fromName = smtp.fromName || 'ROSEO';
+  const fromEmail = smtp.fromEmail || process.env.SMTP_USER || 'support@savantbd.com';
+  const fromName = smtp.fromName || 'SAVANT';
 
   const transporter = await getTransporter();
 
   await transporter.sendMail({
     from: `"${fromName}" <${fromEmail}>`,
     to: email,
-    subject: 'Password Reset - ROSEO',
+    subject: 'Password Reset - SAVANT',
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:system-ui,-apple-system,sans-serif;">
         <div style="background:#1a1a1a;padding:30px;text-align:center;border-radius:12px 12px 0 0;">
-          <h1 style="color:#fff;margin:0;font-size:28px;">ROSEO</h1>
+          <h1 style="color:#fff;margin:0;font-size:28px;">SAVANT</h1>
           <p style="color:#f97316;margin:5px 0 0;">Premium Leather Goods</p>
         </div>
         <div style="padding:30px;background:#fff;border:1px solid #e5e5e5;border-radius:0 0 12px 12px;">
@@ -58,12 +58,54 @@ export const sendPasswordResetEmail = async (email, resetUrl) => {
   });
 };
 
+export const sendVerificationEmail = async (email, verificationUrl) => {
+  const settings = await SiteSettings.getSingleton();
+  const smtp = settings.smtp || {};
+  const fromEmail = smtp.fromEmail || process.env.SMTP_USER || 'support@savantbd.com';
+  const fromName = smtp.fromName || 'SAVANT';
+
+  const transporter = await getTransporter();
+
+  await transporter.sendMail({
+    from: `"${fromName}" <${fromEmail}>`,
+    to: email,
+    subject: 'Verify your email - SAVANT',
+    html: `
+      <div style="max-width:600px;margin:0 auto;font-family:system-ui,-apple-system,sans-serif;">
+        <div style="background:#1a1a1a;padding:30px;text-align:center;border-radius:12px 12px 0 0;">
+          <h1 style="color:#fff;margin:0;font-size:28px;">SAVANT</h1>
+          <p style="color:#f97316;margin:5px 0 0;">Premium Leather Goods</p>
+        </div>
+        <div style="padding:30px;background:#fff;border:1px solid #e5e5e5;border-radius:0 0 12px 12px;">
+          <h2 style="color:#1a1a1a;margin:0 0 20px;">Verify your email address</h2>
+          <p style="color:#525252;font-size:15px;line-height:1.6;">
+            Thanks for creating a SAVANT account. Please confirm your email address to activate your account:
+          </p>
+          <div style="text-align:center;margin:30px 0;">
+            <a href="${verificationUrl}" style="background:#1a1a1a;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;display:inline-block;">
+              Verify Email
+            </a>
+          </div>
+          <p style="color:#737373;font-size:13px;line-height:1.6;">
+            This link will expire in 24 hours. If you didn't create an account, you can safely ignore this email.
+          </p>
+          <hr style="border:none;border-top:1px solid #e5e5e5;margin:25px 0;" />
+          <p style="color:#a3a3a3;font-size:12px;">
+            If the button doesn't work, copy and paste this link into your browser:<br/>
+            <a href="${verificationUrl}" style="color:#f97316;word-break:break-all;">${verificationUrl}</a>
+          </p>
+        </div>
+      </div>
+    `,
+  });
+};
+
 export const sendContactNotification = async (chat) => {
   const settings = await SiteSettings.getSingleton();
   const smtp = settings.smtp || {};
-  const fromEmail = smtp.fromEmail || process.env.SMTP_USER || 'roseobd@mail.com';
-  const fromName = smtp.fromName || 'ROSEO';
-  const toEmail = smtp.fromEmail || process.env.SMTP_USER || 'roseobd@mail.com';
+  const fromEmail = smtp.fromEmail || process.env.SMTP_USER || 'support@savantbd.com';
+  const fromName = smtp.fromName || 'SAVANT';
+  const toEmail = smtp.fromEmail || process.env.SMTP_USER || 'support@savantbd.com';
 
   const transporter = await getTransporter();
 

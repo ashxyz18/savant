@@ -57,6 +57,22 @@ export default function LoginPage() {
     }
   };
 
+  const handleResendVerification = async () => {
+    if (!forgotEmail) {
+      toast.error('Please enter your email');
+      return;
+    }
+    try {
+      setForgotLoading(true);
+      await api.resendVerification(forgotEmail);
+      toast.success('Verification link sent if account exists');
+    } catch (error) {
+      toast.error(error.message || 'Failed to send verification email');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white flex">
       {/* Left side - Form */}
@@ -185,6 +201,17 @@ export default function LoginPage() {
                   >
                     Back to Sign In
                   </button>
+
+                  <div className="mt-4 text-center">
+                    <button
+                      type="button"
+                      onClick={handleResendVerification}
+                      disabled={forgotLoading}
+                      className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
+                    >
+                      Need to verify your email? Resend verification link
+                    </button>
+                  </div>
                 </form>
               )}
             </>

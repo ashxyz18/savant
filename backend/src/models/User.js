@@ -3,6 +3,9 @@ import bcrypt from 'bcryptjs';
 
 const hashPassword = async (doc) => {
   if (doc.isActive === undefined || doc.isActive === null) doc.isActive = true;
+  // Existing/seeded users are considered verified; only explicit `false` (new
+  // registrations) stays unverified until they click the verification link.
+  if (doc.isEmailVerified === undefined || doc.isEmailVerified === null) doc.isEmailVerified = true;
   if (doc.password && !String(doc.password).startsWith('$2')) {
     doc.password = await bcrypt.hash(doc.password, 12);
   }

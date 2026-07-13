@@ -74,6 +74,14 @@ class ApiClient {
     return this.post('/auth/login', { email, password });
   }
 
+  verifyEmail(token) {
+    return this.post('/auth/verify-email', { token });
+  }
+
+  resendVerification(email) {
+    return this.post('/auth/resend-verification', { email });
+  }
+
   getProfile() {
     return this.get('/auth/profile');
   }
