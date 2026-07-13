@@ -81,6 +81,14 @@ jobs:
             sed -i '/^[[:space:]]*FRONTEND_URL[[:space:]]*=/d' .env
             echo "FRONTEND_URL=${FRONTEND_URL_VAL}" >> .env
 
+            echo "== Bootstrap DB: seed only if no users exist (idempotent) =="
+            if [ ! -s data/users.json ] || [ "$(cat data/users.json 2>/dev/null)" = "[]" ]; then
+              echo "No users found - seeding database (creates admin@roseo.com / admin123)..."
+              npm run seed
+            else
+              echo "Users already exist - skipping seed to avoid overwriting data."
+            fi
+
             echo "== DIAGNOSTIC: running node processes =="
             ps -eo pid,ppid,cmd | grep -i node | grep -v grep || echo "no node procs"
             echo "== DIAGNOSTIC: .env FRONTEND_URL =="
