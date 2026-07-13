@@ -81,11 +81,17 @@ jobs:
             sed -i '/^[[:space:]]*FRONTEND_URL[[:space:]]*=/d' .env
             echo "FRONTEND_URL=${FRONTEND_URL_VAL}" >> .env
 
-            echo "== Restarting Node app (force kill stale process + Passenger restart) =="
-            pkill -9 -f "app.js" 2>/dev/null || true
-            pkill -9 -f "nodejs" 2>/dev/null || true
+            echo "== DIAGNOSTIC: running node processes =="
+            ps -eo pid,ppid,cmd | grep -i node | grep -v grep || echo "no node procs"
+            echo "== DIAGNOSTIC: .env FRONTEND_URL =="
+            grep -i "FRONTEND_URL" .env || echo "no FRONTEND_URL line"
+
+            echo "== Restarting Node app (kill ALL node procs + Passenger restart) =="
+            pkill -9 node 2>/dev/null || true
             sleep 5
             mkdir -p tmp
             touch tmp/restart.txt
+            echo "== Post-kill node procs =="
+            ps -eo pid,ppid,cmd | grep -i node | grep -v grep || echo "no node procs"
 
             echo "== Deploy complete =="
