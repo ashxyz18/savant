@@ -1,0 +1,33 @@
+# Render deployment config for the SAVANT backend (Express API).
+# Deploy: Render dashboard -> New -> Blueprint -> connect repo (uses this file),
+# or create a Web Service manually with the settings below.
+services:
+  - type: web
+    name: savant-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    region: oregon
+    branch: master
+    buildCommand: npm install
+    startCommand: node src/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI         # REQUIRED: MongoDB Atlas connection string
+        sync: false
+      # Set these in the Render dashboard (do NOT commit real secrets):
+      - key: FRONTEND_URL        # comma-separated allowed CORS origins (your Hostinger site)
+        sync: false
+      - key: JWT_SECRET          # openssl rand -hex 32
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      # MONGODB_URI / CLOUDINARY_* are unused by the file-based data layer; leave blank.

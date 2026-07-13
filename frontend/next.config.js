@@ -1,7 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  // Hostinger "Web Hosting" (shared) is Apache-only and cannot run `next start`.
+  // We export a fully static site and upload the `out/` folder to public_html.
+  output: 'export',
+  // Apache serves index.html for "/path/" directory requests, so trailing
+  // slashes keep the SPA URLs working without a Node server.
+  trailingSlash: true,
   images: {
+    // No image optimization server on static hosting -> emit plain <img>.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'http',
@@ -20,65 +27,8 @@ const nextConfig = {
         pathname: '/uploads/**',
       },
     ],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256],
-    formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 60,
   },
   compress: true,
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'ALLOWALL',
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: "frame-ancestors *;",
-          },
-        ],
-      },
-      {
-        source: '/images/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        source: '/_next/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        source: '/_next/image(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=86400, stale-while-revalidate=31536000',
-          },
-        ],
-      },
-    ];
-  },
-  async rewrites() {
-    const backendUrl = process.env.BACKEND_URL || 'https://api.savant.com';
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${backendUrl}/api/:path*`,
-      },
-    ];
-  },
 };
 
 module.exports = nextConfig;

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useCart } from '../../context/CartContext';
 import { getImageUrl } from '../../lib/image';
+import { productUrl } from '../../lib/routes';
 import {
   Minus,
   Plus,
@@ -70,7 +71,7 @@ export default function CartPage() {
                 className="bg-white rounded-xl border border-neutral-200 p-4 sm:p-6 flex gap-4 sm:gap-6"
               >
                 <button
-                  onClick={() => router.push(`/products/${product._id}`)}
+                  onClick={() => router.push(productUrl(product._id))}
                   className="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-neutral-50 to-neutral-100 rounded-lg overflow-hidden relative"
                 >
                   {product.images && product.images[0] ? (
@@ -90,7 +91,7 @@ export default function CartPage() {
 
                 <div className="flex-1 min-w-0">
                   <button
-                    onClick={() => router.push(`/products/${product._id}`)}
+                    onClick={() => router.push(productUrl(product._id))}
                     className="text-left"
                   >
                     <h3 className="font-semibold text-neutral-900 hover:text-primary-400 transition-colors truncate">

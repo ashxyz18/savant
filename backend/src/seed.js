@@ -1,5 +1,8 @@
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import db from './lib/db.js';
 import User from './models/User.js';
 import Product from './models/Product.js';
 import Order from './models/Order.js';
@@ -23,6 +26,8 @@ const generateSKU = (category, count) => {
 const seedDatabase = async () => {
   try {
     console.log('Seeding database...');
+
+    await db.connect(process.env.MONGODB_URI);
 
     // Clear existing data
     await User.deleteMany({});
@@ -442,12 +447,21 @@ const seedDatabase = async () => {
     console.log('\n📧 Admin credentials:');
     console.log('   Email: admin@roseo.com');
     console.log('   Password: admin123');
-
-    process.exit(0);
   } catch (error) {
     console.error('Seeding error:', error);
-    process.exit(1);
+    throw error;
   }
 };
 
-seedDatabase();
+// When run directly (`node src/seed.js`) seed and exit. When imported (e.g. by
+// the server for auto-seed), just export the function without exiting.
+const invokedDirectly =
+  process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (invokedDirectly) {
+  seedDatabase()
+    .then(() => process.exit(0))
+    .catch(() => process.exit(1));
+}
+
+export default seedDatabase;

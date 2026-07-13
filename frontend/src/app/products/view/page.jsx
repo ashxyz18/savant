@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import api from '../../../lib/api';
 import { useCart } from '../../../context/CartContext';
 import { getImageUrl } from '../../../lib/image';
+import { productUrl } from '../../../lib/routes';
 import {
   ShoppingCart,
   Heart,
@@ -27,9 +28,10 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-export default function ProductDetailPage() {
-  const params = useParams();
+function ProductDetailPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
   const { addItem } = useCart();
 
   const [product, setProduct] = useState(null);
@@ -42,21 +44,21 @@ export default function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState('description');
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [zoomStyle, setZoomStyle] = useState({});
-  
+
   const imageRef = useRef(null);
-  
+
   useEffect(() => {
-    if (params.id) {
+    if (id) {
       loadProduct();
     }
-  }, [params.id]);
+  }, [id]);
 
   useEffect(() => {
     if (product?._id) {
       try {
         const stored = localStorage.getItem('recentlyViewed');
         let ids = stored ? JSON.parse(stored) : [];
-        ids = ids.filter((id) => id !== product._id);
+        ids = ids.filter((x) => x !== product._id);
         ids.unshift(product._id);
         ids = ids.slice(0, 10);
         localStorage.setItem('recentlyViewed', JSON.stringify(ids));
@@ -69,7 +71,7 @@ export default function ProductDetailPage() {
   const loadProduct = async () => {
     try {
       setLoading(true);
-      const data = await api.getProduct(params.id);
+      const data = await api.getProduct(id);
       setProduct(data);
       if (data.images && data.images.length > 0) {
         setActiveImage(0);
@@ -96,16 +98,16 @@ export default function ProductDetailPage() {
 
   const handleBuyNow = () => {
     addItem(product, quantity);
-    router.push('/checkout');
+    router.push('/cart');
   };
 
   const handleMouseMove = (e) => {
     if (!imageRef.current) return;
-    
+
     const { left, top, width, height } = imageRef.current.getBoundingClientRect();
     const x = ((e.clientX - left) / width) * 100;
     const y = ((e.clientY - top) / height) * 100;
-    
+
     setZoomStyle({
       transformOrigin: `${x}% ${y}%`,
       transform: 'scale(2)'
@@ -157,7 +159,7 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Image Section with Zoom */}
           <div className="space-y-4">
-            <div 
+            <div
               className="relative aspect-square bg-neutral-50 rounded-xl overflow-hidden border border-neutral-200 cursor-zoom-in"
               onClick={() => setLightboxOpen(true)}
               onMouseMove={handleMouseMove}
@@ -179,7 +181,7 @@ export default function ProductDetailPage() {
                   <span className="text-6xl font-bold text-neutral-200">{product.name?.charAt(0) || 'R'}</span>
                 </div>
               )}
-              
+
               <div className="absolute top-4 right-4 flex gap-2">
                 {discount > 0 && (
                   <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-md">
@@ -238,7 +240,7 @@ export default function ProductDetailPage() {
             <div className="text-sm text-neutral-500">
               SKU: {product.sku || 'N/A'}
             </div>
-            
+
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-md capitalize">
                 {product.category}
@@ -534,7 +536,7 @@ export default function ProductDetailPage() {
                 <button
                   key={p._id}
                   onClick={() => {
-                    router.push(`/products/${p._id}`);
+                    router.push(productUrl(p._id));
                     window.scrollTo(0, 0);
                   }}
                   className="group bg-white rounded-lg border border-neutral-200 overflow-hidden hover:border-neutral-400 transition-colors text-left"
@@ -574,13 +576,13 @@ export default function ProductDetailPage() {
       {lightboxOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-lg p-4" onClick={() => setLightboxOpen(false)}>
           <div className="relative max-w-4xl max-h-[90vh] w-full" onClick={(e) => e.stopPropagation()}>
-            <button 
+            <button
               onClick={() => setLightboxOpen(false)}
               className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/40 transition-colors"
             >
               <X size={24} />
             </button>
-            
+
             {product.images && product.images[activeImage] && (
               <div className="relative w-full" style={{ height: '80vh' }}>
                 <Image
@@ -593,7 +595,7 @@ export default function ProductDetailPage() {
                 />
               </div>
             )}
-            
+
             {product.images && product.images.length > 1 && (
               <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3">
                 {product.images.map((img, idx) => (
@@ -618,5 +620,19 @@ export default function ProductDetailPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ProductViewPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-neutral-300 border-t-neutral-900" />
+        </div>
+      }
+    >
+      <ProductDetailPage />
+    </Suspense>
   );
 }

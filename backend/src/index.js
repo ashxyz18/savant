@@ -3,6 +3,8 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import db from './lib/db.js';
+import User from './models/User.js';
 
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
@@ -50,6 +52,11 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/settings', siteSettingsRoutes);
 
+// Root route — used by Elastic Beanstalk / load-balancer health checks.
+app.get('/', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -69,12 +76,37 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message || 'Internal server error' });
 });
 
-// Start the server. On Hostinger Node.js (LSNODE), the entry file MUST call
-// app.listen() unconditionally — guarding with `require.main === module` or
-// import.meta checks is not supported and will cause a startup timeout (503).
+// Start the server. On Elastic Beanstalk / Render this runs as a real Node
+// process. We connect to MongoDB (Atlas) first; if MONGODB_URI is missing the
+// connection helper only warns, so the server still boots (DB calls 500 until
+// it's configured). EB health-checks the root `/` route.
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
+const start = async () => {
+  try {
+    await db.connect(process.env.MONGODB_URI);
+
+    // Auto-seed once: if there are no users yet, populate initial data so the
+    // store works immediately after a fresh deploy (no manual `eb ssh` needed).
+    try {
+      if ((await User.countDocuments()) === 0) {
+        console.log('[seed] database empty — running seed...');
+        const seedDatabase = (await import('./seed.js')).default;
+        await seedDatabase();
+        console.log('[seed] done');
+      }
+    } catch (seedErr) {
+      console.error('[seed] skipped:', seedErr.message);
+    }
+  } catch (err) {
+    console.error('MongoDB connect failed at startup:', err.message);
+  }
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+};
+
+start();
 
 export default app;

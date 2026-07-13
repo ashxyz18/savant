@@ -1,0 +1,27 @@
+# Hostinger "Web Hosting" .htaccess  (upload to public_html)
+# The frontend is a static Next.js export (no Node server needed).
+# Every route is a real folder with index.html, so no SPA rewrite is required.
+
+# 1) Redirect HTTP -> HTTPS
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 2) Pretty URLs: /products/view?... works because the export uses trailingSlash,
+#    generating /products/view/index.html. Apache serves it automatically.
+DirectoryIndex index.html
+
+# 3) Long-cache for hashed build assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+</IfModule>

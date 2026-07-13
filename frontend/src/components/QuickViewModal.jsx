@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { X, Star, ShoppingCart, Heart, Minus, Plus, Truck, Shield, RotateCcw, Check } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { getImageUrl } from '../lib/image';
+import { productUrl } from '../lib/routes';
 import api from '../lib/api';
 import toast from 'react-hot-toast';
 
@@ -308,7 +309,7 @@ const QuickViewModal = ({ productId, isOpen, onClose }) => {
               <button
                 onClick={() => {
                   onClose();
-                  window.location.href = `/products/${product._id}`;
+                  window.location.href = productUrl(product._id);
                 }}
                 className="mt-4 text-sm text-primary-900 font-medium hover:underline text-center"
               >

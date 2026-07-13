@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Clock, ArrowRight, X } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { getImageUrl } from '../lib/image';
+import { productUrl } from '../lib/routes';
 import api from '../lib/api';
 
 const RecentlyViewed = () => {
@@ -87,7 +88,7 @@ const RecentlyViewed = () => {
                 isRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}
               style={{ transitionDelay: `${index * 80}ms` }}
-              onClick={() => router.push(`/products/${product._id}`)}
+              onClick={() => router.push(productUrl(product._id))}
             >
               <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 hover:border-neutral-300 transition-all duration-400">
                 <div className="aspect-square bg-neutral-50 overflow-hidden relative">

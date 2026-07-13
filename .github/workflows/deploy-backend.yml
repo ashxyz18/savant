@@ -1,5 +1,7 @@
-name: Deploy backend to Hostinger
+name: Deploy backend to Elastic Beanstalk
 
+# Deploys the backend to your existing Elastic Beanstalk environment on every
+# push to master that touches backend/ or this workflow.
 on:
   push:
     branches: [master]
@@ -8,94 +10,24 @@ on:
       - '.github/workflows/deploy-backend.yml'
   workflow_dispatch:
 
-concurrency:
-  group: deploy-backend
-  cancel-in-progress: false
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: SSH deploy to Hostinger
-        uses: appleboy/ssh-action@v1.0.3
+      - uses: actions/checkout@v4
+
+      - name: Package backend for Elastic Beanstalk
+        working-directory: backend
+        run: zip -r ../backend-deploy.zip . -x 'node_modules/*' -x '.git/*' -x '*.env' -x 'uploads/*' -x 'data/*'
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregil/elastic-beanstalk-deploy@v1
         with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT || 22 }}
-          script: |
-            set -e
-            export PATH="/opt/alt/alt-nodejs22/root/bin:$PATH"
-            APP_DIR="$HOME/domains/savantbd.com/nodejs"
-            STAGE_DIR="$HOME/.deploy_stage"
-            BRANCH="master"
-
-            echo "== Versions =="
-            node -v
-            npm -v
-
-            echo "== Cloning/fetching repo into stage =="
-            if [ -d "$STAGE_DIR/.git" ]; then
-              cd "$STAGE_DIR"
-              git fetch --all --prune
-              git reset --hard "origin/$BRANCH"
-            else
-              rm -rf "$STAGE_DIR"
-              git clone --branch "$BRANCH" "${{ secrets.REPO_URL }}" "$STAGE_DIR"
-            fi
-
-            echo "== Syncing backend/ into app root (preserving .env/data/uploads/node_modules/tmp) =="
-            mkdir -p "$APP_DIR/data" "$APP_DIR/uploads" "$APP_DIR/tmp"
-            rsync -a --delete \
-              --exclude 'node_modules' \
-              --exclude '.env' \
-              --exclude '/data/' \
-              --exclude '/uploads/' \
-              --exclude '/tmp/' \
-              --exclude 'console.log' \
-              --exclude 'stderr.log' \
-              --exclude '.git' \
-              "$STAGE_DIR/backend/" "$APP_DIR/"
-
-            echo "== Installing backend dependencies =="
-            cd "$APP_DIR"
-            npm install --omit=dev
-
-            echo "== Ensuring data/uploads keepers exist =="
-            [ -f data/.gitkeep ] || touch data/.gitkeep
-            [ -f uploads/.gitkeep ] || touch uploads/.gitkeep
-
-            echo "== Ensuring .env is present (restore from .env.example if missing) =="
-            if [ ! -f .env ]; then
-              echo "WARNING: .env missing - restoring from .env.example. Edit it to add a real JWT_SECRET and SMTP credentials!"
-              cp .env.example .env
-            fi
-
-            echo "== Verify deployed backend code (expect json-file db, NOT mongoose) =="
-            head -3 src/controllers/productController.js
-            grep -c "mongoose" src/controllers/productController.js || true
-
-            echo "== Ensuring FRONTEND_URL allows production origins (CORS) =="
-            FRONTEND_URL_VAL="https://savantbd.com,https://www.savantbd.com,https://api.savant.com,http://localhost:3000"
-            # Remove any existing FRONTEND_URL line(s) (incl. stray duplicates) then append one.
-            sed -i '/^[[:space:]]*FRONTEND_URL[[:space:]]*=/d' .env
-            echo "FRONTEND_URL=${FRONTEND_URL_VAL}" >> .env
-
-            echo "== Bootstrap DB: seed only if no users exist (idempotent) =="
-            if [ ! -s data/users.json ] || [ "$(cat data/users.json 2>/dev/null)" = "[]" ]; then
-              echo "No users found - seeding database (creates admin@roseo.com / admin123)..."
-              npm run seed
-            else
-              echo "Users already exist - skipping seed to avoid overwriting data."
-            fi
-
-            echo "== DIAGNOSTIC: running node processes =="
-            ps -eo pid,ppid,cmd | grep -i node | grep -v grep || echo "no node procs"
-            echo "== DIAGNOSTIC: .env FRONTEND_URL =="
-            grep -i "FRONTEND_URL" .env || echo "no FRONTEND_URL line"
-
-            echo "== Restarting Node app (update entry-file mtime + Passenger restart) =="
-            touch app.js src/index.js
-            mkdir -p tmp
-            touch tmp/restart.txt
-            echo "== Deploy complete =="
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: ${{ secrets.AWS_REGION }}
+          application_name: ${{ secrets.EB_APP_NAME }}
+          environment_name: ${{ secrets.EB_ENV_NAME }}
+          version_label: ${{ github.sha }}
+          version_description: ${{ github.sha }}
+          deployment_package: backend-deploy.zip

@@ -1,196 +1,121 @@
-# Deploying SAVANT to production
+# Deploying SAVANT (frontend on Hostinger, backend on Render)
 
-Architecture for this project:
+## Architecture (this plan)
 
-| Piece        | Host              | Why                                            |
-|--------------|-------------------|------------------------------------------------|
-| Frontend (Next.js) | **Vercel** (free) at `www.savantbd.com` | Next.js SSR + dynamic `/products/[id]` need a long-running Node server. hPanel shared hosting can't run `next start` reliably. |
-| Backend (Express) | **Hostinger** shared hPanel at `savantbd.com` (apex) | Plain request/response Express app. Runs fine under Passenger. Already live and serving `/api/*` at the apex. |
-| Database     | **Local JSON files** in `~/domains/savantbd.com/nodejs/data/` | The app uses a file-based store, NOT MongoDB. Atlas is not needed despite the dep in package.json. |
-| User uploads | `~/domains/savantbd.com/nodejs/uploads/` on Hostinger | Files persist in the hPanel Node app root. |
+| Piece                    | Host                         | Why |
+|--------------------------|------------------------------|-----|
+| Frontend (Next.js)       | **Hostinger "Web Hosting Unlimited"** (`public_html`) | Shared hPanel is Apache-only and **cannot run `next start`**. We build a fully **static export** (`next build` -> `out/`) and upload it. All data is fetched client-side from the API, so the store works as static files. |
+| Backend (Express API)    | **Render** (web service)     | Render runs a real Node.js server. The Express app listens on the injected `PORT` and serves `/api/*` + uploaded files. |
+| Database                 | **MongoDB Atlas** (Mongoose)  | Set via `MONGODB_URI`. Data persists across Render restarts/deploys. |
+| User uploads             | `backend/uploads/` on Render (ephemeral) | Files are wiped on redeploy — switch to Cloudinary or a Render disk for permanent storage (see caveats). |
 
-> Why apex for backend? The `api.` subdomain couldn't be registered with Hostinger's CDN on this plan, but the apex `savantbd.com` already routes through `*.cdn.hstgr.net` and serves the Passenger Node app. So the backend stays on the apex, and the storefront goes on `www.savantbd.com` (Vercel). `www.savantbd.com` already has a CNAME through Hostinger CDN.
+> `NEXT_PUBLIC_API_URL` (frontend) points directly at the Render backend, so no server-side proxy/rewrite is used — that's why static hosting works.
 
 ---
 
-## Part 1 - Backend on Hostinger (hPanel)
+## Part 1 - Backend on Render
 
-### 1.1 Get SSH access (recommended)
-hPanel > **Advanced** > **SSH access** > enable SSH and copy your credentials.
-You can use the File Manager instead of SSH, but SSH is much easier for `npm install` and `npm run seed`.
+1. **Create the service**
+   - Render dashboard -> **New** -> **Blueprint** and connect the GitHub repo (uses `render.yaml`), **or**
+   - **New** -> **Web Service** -> connect repo, then set:
+     - **Root directory:** `backend`
+     - **Runtime:** Node
+     - **Build command:** `npm install`
+     - **Start command:** `node src/index.js`
+     - **Health check path:** `/api/health`
+     - **Plan:** Free (or paid if you need a persistent disk — see caveats)
+     - **Branch:** `master`
 
-### 1.2 Create the Node.js app
-hPanel > **Website** menu (the "web app" feature) > Node.js template:
-- **Node.js version:** 22.x (Hostinger's `alt-nodejs22`)
-- **Application mode:** Production
-- **Application URL / domain:** `savantbd.com` (apex - already hosted)
-- **Application root:** `domains/savantbd.com/nodejs`
-- **App startup file:** `src/index.js`
-- **Package manager:** `npm`
+2. **Environment variables** (Render dashboard -> Environment):
+   | Key | Value |
+   |-----|-------|
+   | `NODE_ENV` | `production` |
+   | `PORT` | *(leave unset — Render injects it)* |
+   | `FRONTEND_URL` | `https://your-hostinger-domain.com` (CORS allow-list; comma-separated for multiple) |
+   | `JWT_SECRET` | `openssl rand -hex 32` output (a long random string) |
+   | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | Your email provider (Brevo/SendGrid/Gmail) |
+    | `MONGODB_URI` | **REQUIRED** — your MongoDB Atlas connection string (`mongodb+srv://...`). The app uses Mongoose, so data persists across deploys. |
+    | `CLOUDINARY_*` | only if you enable Cloudinary uploads (see caveats) |
 
-Click **Create** (or it may already exist - the URL works). Hostinger creates an `.htaccess` in `public_html` with Passenger config pointing at `domains/savantbd.com/nodejs`.
+3. **Deploy & verify**
+   - Click **Deploy**. Once live, open `https://<render-url>/api/health` -> `{"status":"ok",...}`.
 
-### 1.3 Generate an SSH key for GitHub Actions
-On your PC (PowerShell):
+4. **Seed initial data** (first time only)
+   - Open the Render service -> **Shell** and run `npm run seed`.
+   - Default admin: `admin@roseo.com` / `admin123` — **change it immediately** in the admin panel.
+   - Note: on the Free plan the disk is wiped on each deploy, so you'll need to re-seed after redeploys (or use the persistent-disk / MongoDB options in caveats).
+
+---
+
+## Part 2 - Frontend on Hostinger (static export)
+
+### 2.1 Build locally (or in CI)
+From the repo root:
+
 ```powershell
-ssh-keygen -t ed25519 -f "$env:USERPROFILE\.ssh\hostinger_deploy" -N '""'
-```
-This produces two files:
-- `hostinger_deploy` (private key) -> paste as the GitHub Secret `HOSTINGER_SSH_KEY`
-- `hostinger_deploy.pub` (public key) -> append to Hostinger
-
-On Hostinger (hPanel > Advanced > SSH access > Manage SSH keys), upload `hostinger_deploy.pub` and click **Import** so the key is authorized for your account.
-
-### 1.4 Add GitHub Secrets
-GitHub repo (https://github.com/ashxyz18/savant) > **Settings > Secrets and variables > Actions** > **New repository secret**:
-
-| Secret name              | Value                                                                          |
-|--------------------------|--------------------------------------------------------------------------------|
-| `HOSTINGER_SSH_HOST`     | Your account's SSH host (seen in hPanel > SSH access). Example: `ssh.hostinger.com` or the server IP. |
-| `HOSTINGER_SSH_USER`     | Your hPanel SSH username, e.g. `u123456789`.                                  |
-| `HOSTINGER_SSH_PORT`     | `65022` (Hostinger's default SSH port; confirm in hPanel).                    |
-| `HOSTINGER_SSH_KEY`      | Full contents of the **private** key file `hostinger_deploy`.                 |
-| `REPO_URL`               | The HTTPS URL of your repo with a Personal Access Token embedded, so the server can clone a private repo: `https://<token>@github.com/ashxyz18/savant.git` (use a fine-grained PAT with **Contents: Read** only, scoped to this repo). If your repo is public, just use `https://github.com/ashxyz18/savant.git`. |
-
-### 1.5 First-time clone of the backend on the server
-The auto-deploy workflow clones the repo on its **first run**. To trigger it:
-1. Push a commit on the default branch (`main` or `master`) that touches `backend/`.
-2. GitHub repo > **Actions** tab > watch the **Deploy backend to Hostinger** run.
-3. The workflow will SSH in, sync `backend/` into `~/domains/savantbd.com/nodejs`, run `npm install --omit=dev`, and touch `tmp/restart.txt` (Passenger picks up the restart).
-
-> If your repo's default branch is `master` instead of `main`, edit `.github/workflows/deploy-backend.yml` and change `branches: [main]` and `BRANCH="main"` to `master` before pushing.
-
-### 1.6 Configure the production `.env` (one-time, on the server)
-The `.env` file is git-ignored (never committed). Create it on the server once via SSH:
-
-```bash
-ssh -p 65022 <user>@<host>
-cd ~/domains/savantbd.com/nodejs
-cp .env.example .env
-nano .env   # or use hPanel File Manager to edit
+$env:NEXT_PUBLIC_API_URL = "https://<your-render-backend-url>/api"
+cd frontend
+npm install
+npm run build      # outputs ./out
 ```
 
-Fill in:
+This produces a static site in `frontend/out/`. The product page is now a static route
+`/products/view/?id=<id>` (so new products work without a rebuild).
 
-| Variable      | Value                                                                 |
-|---------------|-----------------------------------------------------------------------|
-| `PORT`        | Leave unset for Passenger (it injects `PORT`). Only set for manual `npm start` tests. |
-| `FRONTEND_URL`| `https://savantbd.com,https://www.savantbd.com` (comma-separated).   |
-| `JWT_SECRET`  | A long random string. Generate with `openssl rand -hex 32`.           |
-| `SMTP_*`      | Your email provider details (see Part 3).                             |
+### 2.2 Upload to Hostinger
+1. hPanel -> **Hosting** -> **File Manager** -> open `public_html`.
+2. Delete the default `index.html` / `default.php` if present.
+3. Upload **everything inside `frontend/out/`** into `public_html` (keep the folder structure: `index.html`, `_next/`, `products/`, etc.).
+   - Or use FTP. You can zip `out/`, upload, and extract in `public_html`.
+4. Upload the sample `.htaccess` from `deploy/hostinger.htaccess` into `public_html` (rename to `.htaccess`).
 
-> MongoDB and Cloudinary vars can be left blank - the app doesn't use them yet.
+### 2.3 Domain / DNS
+- Point your domain's A record (or Hostinger's default) at the hosting. The frontend is served from the apex/`www` as static files — no backend proxy needed.
+- Make sure `NEXT_PUBLIC_API_URL` (the Render URL) is reachable from the browser; CORS is handled by the backend's `FRONTEND_URL`.
 
-After saving `.env`, restart the app from hPanel > Node.js > Restart, or SSH in and run `touch tmp/restart.txt` from the app root. **Future deploys preserve this `.env` file** because it's git-ignored and the workflow only does `git pull`, not `git clean`.
-
-### 1.7 Seed initial data (first deploy only)
-The seed script writes demo products/categories/users into `backend/data/*.json`. Run it once via SSH:
-
-```bash
-cd ~/domains/savantbd.com/nodejs
-npm run seed
-```
-
-Default seeded admin login: `admin@roseo.com` / `admin123`. **Change this immediately** after logging into the admin panel. You can re-run this any time later to reset demo data (it wipes and rebuilds).
-
-### 1.8 Verify the backend
-Open `https://savantbd.com/api/health` in your browser. You should get:
-```json
-{"status":"ok","timestamp":"..."}
-```
-
-### 1.9 SSL for the apex domain
-The apex `savantbd.com` already has a Let's Encrypt cert from Hostinger (it's serving HTTPS now). No additional SSL step needed.
+### 2.4 (Optional) Automate rebuilds
+Hostinger shared hosting has no build pipeline. Rebuild locally and re-upload `out/` whenever you change frontend code. (Render auto-redeploys the backend on git push if you connected the repo.)
 
 ---
 
-## Part 2 - Frontend on Vercel
+## Part 3 - Email (optional but needed for chat / forgot-password)
 
-### 2.1 Import the existing repo
-Vercel deploys from Git. Your repo is already at `github.com/ashxyz18/savant`.
-- vercel.com > **Add New** > **Project** > import the `ashxyz18/savant` repo.
-- **Framework preset:** Next.js
-- **Root Directory:** `frontend` (this is a monorepo - the Next.js app lives in the `frontend/` subfolder)
-- **Build command:** `next build` (default, also declared in `frontend/vercel.json`)
-- **Output directory:** leave default (Vercel handles `output: 'standalone'` automatically)
-- **Node version:** 18.x (Vercel uses 20 by default; set `engines.node: "18.x"` in `frontend/package.json` if you want to pin)
-
-### 2.3 Set Vercel environment variables
-Project > Settings > Environment Variables. Add to **Production** and **Preview**:
-
-| Variable                | Value                                   | Purpose |
-|-------------------------|-----------------------------------------|---------|
-| `BACKEND_URL`           | `https://savantbd.com`            | Used by `next.config.js` `rewrites()` to proxy `/api/*` from the Vercel domain to the Hostinger backend. **Recommended** because it avoids CORS. |
-| `BACKEND_HOSTNAME`      | `savantbd.com`                   | Lets `next/image` optimize images served from your backend's `/uploads`. |
-| `BACKEND_PROTOCOL`      | `https`                                 | Same. |
-| `NEXT_PUBLIC_API_URL`   | **Leave unset** if you use the rewrite proxy. If you'd rather call the backend directly, set this to `https://savantbd.com/api` (and make sure backend CORS includes the Vercel origin). | |
-
-### 2.4 Add your custom domain
-Vercel project > **Settings** > **Domains** > add `www.savantbd.com` (primary).
-Do **not** add the apex `savantbd.com` in Vercel - that still points at Hostinger for the backend.
-
-### 2.5 Configure DNS at Hostinger
-hPanel > **Domains** > `savantbd.com` > **DNS / Zone Editor**:
-- `www.savantbd.com` should already have a CNAME. **Change it** to point to `cname.vercel-dns.com` (Vercel will tell you the exact target when you add the domain in step 2.4).
-- Leave the apex `savantbd.com` A records untouched (they point at Hostinger and serve the backend).
-- The backend now runs on the `api.savant.com` subdomain (point its A/CNAME record at the Hostinger Node.js app). Update the frontend's `NEXT_PUBLIC_API_URL` (Vercel) to `https://api.savant.com/api` and `BACKEND_URL` to `https://api.savant.com`.
-
-### 2.6 SSL
-Vercel issues the SSL cert automatically when you add the domain in 2.4 and point DNS in 2.5.
+Backend uses `nodemailer`. Set the `SMTP_*` vars on Render (Part 1.2). A transactional SMTP (Brevo, SendGrid) is recommended over Gmail.
 
 ---
 
-## Part 3 - Email (optional, but the chat/forgot-password features need it)
+## Part 4 - Caveats you MUST know
 
-The backend uses `nodemailer`. Recommended: a transactional SMTP (Brevo, SendGrid, Mailgun) so you don't hit Gmail's rate limits or need app passwords.
+### Database now persists (MongoDB Atlas)
+The data layer uses Mongoose against **MongoDB Atlas**, so products, orders, users, etc. survive Render restarts/deploys. Set `MONGODB_URI` on Render (and locally in `backend/.env`). The old local JSON file store is gone. Seed once with `npm run seed` (Render Shell) — you do **not** need to re-seed after redeploys.
 
-Set in the backend `.env`:
+### Uploads are still ephemeral on Render
+`backend/uploads/` lives on Render's disposable disk, so product images uploaded in the admin panel are wiped on each deploy. For permanent storage, enable **Cloudinary** (the `cloudinary` dep is already installed): set `CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET` and switch `backend/src/middleware/upload.js` to Cloudinary storage. Until then, re-upload images after redeploys or use a Render persistent disk mounted at `/app/uploads`.
 
-```
-SMTP_HOST=smtp-relay.brevo.com
-SMTP_PORT=587
-SMTP_USER=your_brevo_login@example.com
-SMTP_PASSWORD=your_brevo_smtp_key
-```
+### Images are unoptimized
+`next.config.js` sets `images.unoptimized: true` because there is no image server on static hosting. Product images are served straight from the Render backend's `/uploads`, so those URLs must be reachable (and CORS/`FRONTEND_URL` correct).
 
----
+### Product URLs changed
+Old: `/products/<id>` (server route). New: `/products/view/?id=<id>` (static). Search engines / old bookmarks to the old format will 404 — add redirects in `.htaccess` if you had them indexed.
 
-## Part 4 - Important caveats on shared hPanel hosting
-
-### File-based database
-`backend/data/*.json` is the database. On shared hosting:
-- Files persist across app restarts (good).
-- Passenger may **recycle the app process** between requests when load is low, reloading files from disk. This means data written by one request is picked up by the next, but very-high concurrent write traffic can race. For a normal storefront this is fine; for heavy admin use, schedule a move to MongoDB Atlas later (the `mongoose` dep is already there).
-- **Back up `data/` regularly.** Download it via File Manager or add a cron via hPanel > **Cron Jobs** to `tar` it nightly elsewhere.
-
-### Uploads
-Uploaded product images land in `backend/uploads/`. They persist, but they're lost if hPanel restores your account from a backup snapshot. For production resilience, change the upload flow later to push to Cloudinary (the dep is present) instead of local disk.
-
-### Long-running processes / WebSockets
-The chat feature is plain HTTP polling-style (no WebSockets), so it works on Passport. Do not add `socket.io` to the backend while on shared hosting.
-
-### Process limits
-Hostinger shared plans cap CPU minutes per month and concurrent processes. For a typical store this is plenty; if you hit limits, the upgrade path is Hostinger Cloud / VPS.
+### No server-side rendering
+The store is a client-rendered SPA. SEO for product pages is weaker than the old SSR setup; acceptable for this hosting constraint.
 
 ---
 
 ## Part 5 - Post-deploy checklist
-
-- [ ] `https://savantbd.com/api/health` returns `{"status":"ok"}` over HTTPS
-- [ ] `https://www.savantbd.com` loads the storefront
-- [ ] A product page like `https://www.savantbd.com/products/<some-id>` loads (verifies SSR rewrites to backend)
-- [ ] Admin login at `https://www.savantbd.com/admin/login` works with seeded creds
-- [ ] Change the seeded admin password immediately
-- [ ] CORS: confirm the browser console shows no CORS errors when the frontend calls `/api/*`
-- [ ] Test `Forgot password` email sends and the reset link uses `FRONTEND_URL` correctly
-- [ ] Test product image upload in admin works and the image displays on the storefront
-- [ ] Back up `~/domains/savantbd.com/nodejs/data/` and `~/domains/savantbd.com/nodejs/uploads/`
+- [ ] `https://<render>/api/health` returns `{"status":"ok"}`
+- [ ] `https://<hostinger-domain>` loads the storefront
+- [ ] A product opens at `https://<hostinger-domain>/products/view/?id=<some-id>`
+- [ ] Admin login works with seeded creds; **change the admin password**
+- [ ] No CORS errors in the browser console when the frontend calls the API
+- [ ] Forgot-password email sends and the reset link uses `FRONTEND_URL`
+- [ ] Product image upload works and displays (see storage caveat)
+- [ ] Back up `backend/data/` and `backend/uploads/` if using a persistent disk
 
 ---
 
-## Local dev reminder (unchanged)
-
+## Local dev (unchanged)
 Backend: `cd backend && npm install && npm run dev` (PORT 5000)
 Frontend: `cd frontend && npm install && npm run dev` (proxies `/api` to `http://localhost:5000`)
-
-The deploy changes do not affect local development.
+Set `NEXT_PUBLIC_API_URL=http://localhost:5000/api` for local frontend dev if needed.

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { TrendingUp, ArrowRight, Flame, Clock, Star } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { getImageUrl } from '../lib/image';
+import { productUrl } from '../lib/routes';
 import api from '../lib/api';
 
 const TrendingNow = () => {
@@ -88,7 +89,7 @@ const TrendingNow = () => {
                 isRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
               style={{ transitionDelay: `${index * 100}ms` }}
-              onClick={() => router.push(`/products/${product._id}`)}
+              onClick={() => router.push(productUrl(product._id))}
             >
               <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 hover:border-neutral-300 transition-all duration-500">
                 <div className="relative aspect-[4/3] bg-neutral-50 overflow-hidden">
@@ -116,7 +117,7 @@ const TrendingNow = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        router.push(`/products/${product._id}`);
+                        router.push(productUrl(product._id));
                       }}
                       className="w-full py-2.5 bg-white text-neutral-900 rounded-lg text-xs font-semibold hover:bg-primary-900 hover:text-white transition-all duration-300"
                     >

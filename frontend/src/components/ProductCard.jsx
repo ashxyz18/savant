@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Heart, ShoppingCart, Star, Eye, Zap, Check, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { getImageUrl } from '../lib/image';
+import { productUrl } from '../lib/routes';
 import toast from 'react-hot-toast';
 
 const ProductCard = ({ product, onQuickView }) => {
@@ -41,7 +42,7 @@ const ProductCard = ({ product, onQuickView }) => {
   };
 
   const handleCardClick = () => {
-    router.push(`/products/${product._id}`);
+    router.push(productUrl(product._id));
   };
 
   const getBadgeConfig = (category) => {
