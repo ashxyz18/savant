@@ -1,5 +1,6 @@
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
+import { initiateSSLCOMMERZ } from '../lib/sslcommerz.js';
 
 export const getMyOrders = async (req, res) => {
   try {
@@ -140,9 +141,12 @@ export const createOrder = async (req, res) => {
     // Generate order number
     const orderCount = await Order.countDocuments();
     const orderNumber = `ROSEO-${String(orderCount + 1).padStart(6, '0')}`;
+    const tran_id = `TXN-${Date.now()}-${orderCount + 1}`;
+    const currency = 'BDT';
 
     const order = await Order.create({
       orderNumber,
+      tran_id,
       user: req.user?._id || null,
       items,
       shippingAddress,
@@ -150,8 +154,36 @@ export const createOrder = async (req, res) => {
       shippingCost,
       tax,
       total,
+      currency,
       paymentMethod: paymentMethod || 'card',
     });
+
+    // SSLCOMMERZ hosted checkout: create the order, then redirect the user
+    // to the gateway. The frontend receives the URL and navigates there.
+    if (paymentMethod === 'sslcommerz') {
+      const siteUrl =
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        (process.env.FRONTEND_URL || 'http://localhost:3000').split(',')[0];
+      const gatewayUrl = await initiateSSLCOMMERZ({
+        tran_id,
+        total,
+        currency,
+        productName: items.map((i) => i.name).join(', ').slice(0, 200),
+        customer: {
+          name: `${shippingAddress.firstName} ${shippingAddress.lastName}`,
+          email: shippingAddress.email,
+          phone: shippingAddress.phone,
+          address: shippingAddress.address,
+          city: shippingAddress.city,
+          country: shippingAddress.country,
+        },
+        successUrl: `${siteUrl}/api/payment/success`,
+        failUrl: `${siteUrl}/api/payment/fail`,
+        cancelUrl: `${siteUrl}/api/payment/cancel`,
+        ipnUrl: `${siteUrl}/api/payment/ipn`,
+      });
+      return res.status(200).json({ paymentUrl: gatewayUrl, orderNumber, tran_id });
+    }
 
     res.status(201).json(order);
   } catch (error) {

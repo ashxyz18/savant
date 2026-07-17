@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
-import toast from 'react-hot-toast';
+import { formatBDT } from '../../lib/format';
 import { 
   User, Package, Settings, LogOut, Edit, 
   Calendar, MapPin, CreditCard, Truck, CheckCircle, Clock, XCircle 
@@ -375,7 +375,7 @@ export default function AccountPage() {
                               </td>
                               <td className="py-4 px-4">
                                 <div className="font-semibold text-gray-900">
-                                  ${order.total?.toFixed(2) || '0.00'}
+                                  {formatBDT(order.total) || '৳0.00'}
                                 </div>
                               </td>
                               <td className="py-4 px-4">

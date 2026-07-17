@@ -15,6 +15,7 @@ import brandRoutes from './routes/brandRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import siteSettingsRoutes from './routes/siteSettingsRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 
 dotenv.config();
 
@@ -51,6 +52,7 @@ app.use('/api/brands', brandRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/settings', siteSettingsRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // Root route — used by Elastic Beanstalk / load-balancer health checks.
 app.get('/', (req, res) => {

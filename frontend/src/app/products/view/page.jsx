@@ -7,6 +7,7 @@ import api from '../../../lib/api';
 import { useCart } from '../../../context/CartContext';
 import { getImageUrl } from '../../../lib/image';
 import { productUrl } from '../../../lib/routes';
+import { formatBDT } from '../../../lib/format';
 import {
   ShoppingCart,
   Heart,
@@ -275,15 +276,15 @@ function ProductDetailPage() {
 
             <div className="flex items-end gap-3">
               <span className="text-3xl font-bold text-neutral-900">
-                ${product.price?.toFixed(2)}
+                {formatBDT(product.price)}
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
                 <>
                   <span className="text-base text-neutral-400 line-through">
-                    ${product.originalPrice.toFixed(2)}
+                    {formatBDT(product.originalPrice)}
                   </span>
                   <span className="text-xs font-semibold text-red-500 bg-red-50 px-2 py-0.5 rounded">
-                    Save ${(product.originalPrice - product.price).toFixed(2)}
+                    Save {formatBDT(product.originalPrice - product.price)}
                   </span>
                 </>
               )}
@@ -390,7 +391,7 @@ function ProductDetailPage() {
                 <Truck size={18} className="text-neutral-400" />
                 <div>
                   <p className="text-xs font-medium text-neutral-800">Free Shipping</p>
-                  <p className="text-xs text-neutral-400">On orders over $50</p>
+                  <p className="text-xs text-neutral-400">On orders over ৳100</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-lg">

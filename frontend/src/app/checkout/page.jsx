@@ -7,6 +7,7 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { getImageUrl } from '../../lib/image';
 import api from '../../lib/api';
+import { formatBDT } from '../../lib/format';
 import {
   ArrowLeft,
   CreditCard,
@@ -51,7 +52,7 @@ export default function CheckoutPage() {
     cvv: '',
   });
 
-  const shippingCost = subtotal > 50 ? 0 : 9.99;
+  const shippingCost = subtotal > 100 ? 0 : 10;
   const tax = subtotal * 0.08;
   const total = subtotal + shippingCost + tax;
 
@@ -110,8 +111,15 @@ export default function CheckoutPage() {
       };
 
       const order = await api.createOrder(orderData);
-      setOrderId(order.orderNumber || order._id);
       clearCart();
+
+      // SSLCOMMERZ returns a hosted gateway URL — redirect the browser there.
+      if (order.paymentUrl) {
+        window.location.href = order.paymentUrl;
+        return;
+      }
+
+      setOrderId(order.orderNumber || order._id);
       setStep(3);
       toast.success('Order placed successfully!');
     } catch (error) {
@@ -454,6 +462,24 @@ export default function CheckoutPage() {
                       <Truck size={20} className="text-neutral-600" />
                       <span className="font-medium text-neutral-800">Cash on Delivery</span>
                     </label>
+                    <label
+                      className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${
+                        payment.method === 'sslcommerz'
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-neutral-200 hover:border-neutral-300'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="method"
+                        value="sslcommerz"
+                        checked={payment.method === 'sslcommerz'}
+                        onChange={handlePaymentChange}
+                        className="text-primary-400 focus:ring-primary-500"
+                      />
+                      <CreditCard size={20} className="text-neutral-600" />
+                      <span className="font-medium text-neutral-800">Online Payment (bKash, Nagad, Card)</span>
+                    </label>
                   </div>
 
                   {payment.method === 'card' && (
@@ -567,7 +593,7 @@ export default function CheckoutPage() {
                     ) : (
                       <>
                         <Lock size={16} />
-                        Place Order — ${total.toFixed(2)}
+                        Place Order — {formatBDT(total)}
                       </>
                     )}
                   </button>
@@ -603,7 +629,7 @@ export default function CheckoutPage() {
                       <p className="text-xs text-neutral-500">Qty: {quantity}</p>
                     </div>
                     <p className="text-sm font-medium text-neutral-900">
-                      ${(product.price * quantity).toFixed(2)}
+                      {formatBDT(product.price * quantity)}
                     </p>
                   </div>
                 ))}
@@ -612,7 +638,7 @@ export default function CheckoutPage() {
               <div className="border-t border-neutral-200 pt-4 space-y-2 text-sm">
                 <div className="flex justify-between text-neutral-600">
                   <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatBDT(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-neutral-600">
                   <span>Shipping</span>
@@ -620,17 +646,17 @@ export default function CheckoutPage() {
                     {shippingCost === 0 ? (
                       <span className="text-green-600 font-medium">Free</span>
                     ) : (
-                      `$${shippingCost.toFixed(2)}`
+                      formatBDT(shippingCost)
                     )}
                   </span>
                 </div>
                 <div className="flex justify-between text-neutral-600">
                   <span>Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>{formatBDT(tax)}</span>
                 </div>
                 <div className="border-t border-neutral-200 pt-2 flex justify-between font-bold text-neutral-900 text-base">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{formatBDT(total)}</span>
                 </div>
               </div>
 
