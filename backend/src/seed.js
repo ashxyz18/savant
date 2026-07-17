@@ -41,7 +41,7 @@ const seedDatabase = async () => {
     const admin = await User.create({
       name: 'Admin User',
       email: 'admin@roseo.com',
-      password: 'admin123',
+      password: 'e^#djvkhM(g07AH@8KaS9D6o',
       role: 'admin',
       isActive: true,
     });

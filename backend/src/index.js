@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import db from './lib/db.js';
 import User from './models/User.js';
+import { secureAdminPassword } from './migrations/secureAdmin.js';
 
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
@@ -97,6 +98,13 @@ const start = async () => {
       }
     } catch (seedErr) {
       console.error('[seed] skipped:', seedErr.message);
+    }
+
+    // One-time: secure the admin password if it still uses the weak default.
+    try {
+      await secureAdminPassword(User);
+    } catch (migErr) {
+      console.error('[migration] skipped:', migErr.message);
     }
   } catch (err) {
     console.error('MongoDB connect failed at startup:', err.message);
