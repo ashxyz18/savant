@@ -131,7 +131,7 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           <Link href="/" className="flex items-center gap-2 mb-12">
             <div className="w-8 h-8 bg-[#7B1E3B] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">R</span>
+              <span className="text-white font-bold text-sm">S</span>
             </div>
             <span className="font-display text-xl font-bold text-[#7B1E3B]">SAVANT</span>
           </Link>
@@ -311,7 +311,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex flex-1 bg-[#7B1E3B] items-center justify-center p-12">
         <div className="max-w-md text-center">
           <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-8">
-            <span className="text-[#7B1E3B] font-bold text-3xl">R</span>
+            <span className="text-[#7B1E3B] font-bold text-3xl">S</span>
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">
             Premium Leather Craftsmanship

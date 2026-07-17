@@ -46,7 +46,7 @@ export default function AdminLoginPage() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-4">
             <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30">
-              <span className="text-white font-bold text-2xl">R</span>
+              <span className="text-white font-bold text-2xl">S</span>
             </div>
             <span className="font-display text-3xl font-bold text-white">SAVANT</span>
           </div>

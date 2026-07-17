@@ -93,7 +93,7 @@ export default function AdminLayout({ children }) {
           <div className="flex items-center justify-between p-6 border-b border-neutral-800">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">R</span>
+                <span className="text-white font-bold text-lg">S</span>
               </div>
               <div>
                 <span className="font-display text-xl font-bold text-white">SAVANT</span>

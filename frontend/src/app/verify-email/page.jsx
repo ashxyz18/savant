@@ -50,7 +50,7 @@ function VerifyEmailForm() {
         <div className="w-full max-w-sm text-center">
           <Link href="/" className="flex items-center gap-2 mb-12 justify-center">
             <div className="w-8 h-8 bg-neutral-900 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">R</span>
+              <span className="text-white font-bold text-sm">S</span>
             </div>
             <span className="font-display text-xl font-bold text-neutral-900">SAVANT</span>
           </Link>
@@ -104,7 +104,7 @@ function VerifyEmailForm() {
       <div className="hidden lg:flex flex-1 bg-neutral-900 items-center justify-center p-12">
         <div className="max-w-md text-center">
           <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-8">
-            <span className="text-neutral-900 font-bold text-3xl">R</span>
+            <span className="text-neutral-900 font-bold text-3xl">S</span>
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">
             Premium Leather Craftsmanship

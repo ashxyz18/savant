@@ -95,7 +95,7 @@ function App() {
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                  <span className="text-neutral-900 font-bold text-lg">R</span>
+                  <span className="text-neutral-900 font-bold text-lg">S</span>
                 </div>
                 <span className="font-display text-2xl font-bold">SAVANT</span>
               </div>
