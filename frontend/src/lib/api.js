@@ -282,6 +282,11 @@ class ApiClient {
     return this.post('/auth/register', data);
   }
 
+  // Auth - Social login (Google/Facebook id_token or access_token)
+  socialLogin(provider, token) {
+    return this.post('/auth/social', { provider, token });
+  }
+
   // Site Settings
   getSettings() {
     return this.get('/settings');

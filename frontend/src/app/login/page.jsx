@@ -7,10 +7,42 @@ import Link from 'next/link';
 import api from '../../lib/api';
 import toast from 'react-hot-toast';
 
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+const FACEBOOK_APP_ID = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '';
+
+// Open an OAuth provider popup and resolve with the returned token.
+const openSocialPopup = (url) =>
+  new Promise((resolve, reject) => {
+    const popup = window.open(url, 'savant-social', 'width=500,height=600');
+    if (!popup) return reject(new Error('Popup blocked'));
+    const timer = setInterval(() => {
+      try {
+        if (popup.closed) {
+          clearInterval(timer);
+          return reject(new Error('Popup closed'));
+        }
+        const loc = popup.location.href;
+        if (loc.includes('localhost') || loc.includes(window.location.host)) {
+          // Google returns id_token in hash; Facebook returns access_token in hash.
+          const hash = new URLSearchParams(popup.location.hash.replace('#', ''));
+          const idToken = hash.get('id_token') || hash.get('access_token');
+          if (idToken) {
+            clearInterval(timer);
+            popup.close();
+            resolve(idToken);
+          }
+        }
+      } catch {
+        // cross-origin until redirect to our domain; ignore
+      }
+    }, 500);
+  });
+
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, socialLogin } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState('');
   const [form, setForm] = useState({ email: '', password: '' });
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
@@ -36,6 +68,31 @@ export default function LoginPage() {
       toast.error(error.message || 'Invalid credentials');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSocial = async (provider) => {
+    try {
+      setSocialLoading(provider);
+      const redirectUri = `${window.location.origin}/login`;
+      let authUrl;
+      if (provider === 'google') {
+        authUrl =
+          `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}` +
+          `&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=id_token&scope=email%20profile&nonce=${Date.now()}`;
+      } else {
+        authUrl =
+          `https://www.facebook.com/v18.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}` +
+          `&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=email%20public_profile`;
+      }
+      const token = await openSocialPopup(authUrl);
+      const data = await socialLogin(provider, token);
+      toast.success('Welcome!');
+      router.push(data.user.role === 'admin' ? '/admin' : '/');
+    } catch (error) {
+      toast.error(error.message || 'Social login failed');
+    } finally {
+      setSocialLoading('');
     }
   };
 
@@ -138,6 +195,43 @@ export default function LoginPage() {
                 >
                   {loading ? 'Signing in...' : 'Sign in'}
                 </button>
+
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-neutral-200" />
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-white px-3 text-neutral-400">or continue with</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleSocial('google')}
+                    disabled={socialLoading === 'google'}
+                    className="flex items-center justify-center gap-2 py-3 border border-neutral-200 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 transition-colors"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.65l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.11a6.6 6.6 0 0 1 0-4.22V7.05H2.18a11 11 0 0 0 0 9.9l3.66-2.84z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.05l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/>
+                    </svg>
+                    Google
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSocial('facebook')}
+                    disabled={socialLoading === 'facebook'}
+                    className="flex items-center justify-center gap-2 py-3 border border-neutral-200 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 transition-colors"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="#1877F2">
+                      <path d="M24 12a12 12 0 1 0-13.88 11.85v-8.38H7.08V12h3.04V9.36c0-3 1.79-4.67 4.53-4.67 1.31 0 2.68.24 2.68.24v2.95h-1.51c-1.49 0-1.95.92-1.95 1.87V12h3.32l-.53 3.47h-2.79v8.38A12 12 0 0 0 24 12z"/>
+                    </svg>
+                    Facebook
+                  </button>
+                </div>
               </form>
 
               <p className="mt-8 text-center text-sm text-neutral-500">

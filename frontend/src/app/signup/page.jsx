@@ -60,6 +60,9 @@ export default function SignupPage() {
             <p className="text-sm text-neutral-500 mb-2">
               We&apos;ve sent a verification link to <span className="font-medium text-neutral-700">{form.email}</span>.
             </p>
+            <p className="text-sm text-neutral-500 mb-2">
+              Your WhatsApp number <span className="font-medium text-neutral-700">{form.phone}</span> is verified.
+            </p>
             <p className="text-sm text-neutral-500 mb-6">
               Click the link in the email to activate your account. You can continue browsing in the meantime.
             </p>

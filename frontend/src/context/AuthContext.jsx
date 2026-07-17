@@ -58,6 +58,15 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const socialLogin = async (provider, token) => {
+    const data = await api.socialLogin(provider, token);
+    localStorage.setItem('roseo_token', data.token);
+    localStorage.setItem('roseo_user', JSON.stringify(data.user));
+    setUser(data.user);
+    setIsAdmin(data.user.role === 'admin');
+    return data;
+  };
+
   const logout = useCallback(() => {
     localStorage.removeItem('roseo_token');
     localStorage.removeItem('roseo_user');
