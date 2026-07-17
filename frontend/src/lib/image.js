@@ -1,4 +1,4 @@
-const UPLOAD_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://api.savant.com/api').replace('/api', '');
+const UPLOAD_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://savant-backend-kgxl.onrender.com/api').replace('/api', '');
 
 export const getImageUrl = (img) => {
   if (!img) return '';

@@ -35,12 +35,12 @@ export default function CheckoutPage() {
     firstName: user?.name?.split(' ')[0] || '',
     lastName: user?.name?.split(' ').slice(1).join(' ') || '',
     email: user?.email || '',
-    phone: '',
+    phone: user?.phone || '',
     address: '',
     city: '',
     state: '',
     zipCode: '',
-    country: 'United States',
+    country: 'Bangladesh',
   });
 
   const [payment, setPayment] = useState({
@@ -387,6 +387,7 @@ export default function CheckoutPage() {
                       onChange={handleShippingChange}
                       className="w-full px-3 py-2.5 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:border-primary-500"
                     >
+                      <option value="Bangladesh">Bangladesh</option>
                       <option value="United States">United States</option>
                       <option value="Canada">Canada</option>
                       <option value="United Kingdom">United Kingdom</option>

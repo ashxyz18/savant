@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.savant.com/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://savant-backend-kgxl.onrender.com/api';
 
 class ApiClient {
   constructor() {

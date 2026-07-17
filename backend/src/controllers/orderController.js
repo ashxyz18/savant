@@ -89,6 +89,30 @@ export const createOrder = async (req, res) => {
   try {
     const { items, shippingAddress, paymentMethod } = req.body;
 
+    // Require a phone number and a complete shipping address before any order
+    // can be placed. This is enforced server-side so it cannot be bypassed
+    // from the client.
+    if (!shippingAddress || typeof shippingAddress !== 'object') {
+      return res.status(400).json({ message: 'Shipping address is required' });
+    }
+    const requiredAddressFields = [
+      'firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state', 'zipCode',
+    ];
+    for (const field of requiredAddressFields) {
+      if (!shippingAddress[field] || !String(shippingAddress[field]).trim()) {
+        return res.status(400).json({ message: `Shipping ${field} is required` });
+      }
+    }
+    if (!/^\+?[\d\s()-]{6,}$/.test(shippingAddress.phone)) {
+      return res.status(400).json({ message: 'A valid phone number is required' });
+    }
+    if (!shippingAddress.email.includes('@')) {
+      return res.status(400).json({ message: 'A valid email is required' });
+    }
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: 'Your cart is empty' });
+    }
+
     // Calculate totals
     let subtotal = 0;
     for (const item of items) {
