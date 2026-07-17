@@ -176,6 +176,7 @@ export const socialLogin = async (req, res) => {
         email: user.email,
         role: user.role,
         avatar: user.avatar,
+        phone: user.phone || '',
         isEmailVerified: user.isEmailVerified,
       },
       token: jwtToken,

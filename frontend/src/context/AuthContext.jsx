@@ -58,12 +58,17 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const socialLogin = async (provider, token) => {
+  const socialLogin = async (provider, token, router) => {
     const data = await api.socialLogin(provider, token);
     localStorage.setItem('roseo_token', data.token);
     localStorage.setItem('roseo_user', JSON.stringify(data.user));
     setUser(data.user);
     setIsAdmin(data.user.role === 'admin');
+    // Social providers (Google/Facebook) don't supply a phone number, so
+    // redirect users without one to the account page to add it.
+    if (router && !data.user.phone) {
+      router.push('/account?addPhone=1');
+    }
     return data;
   };
 
@@ -75,7 +80,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, login, register, logout, checkAuth }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, login, register, socialLogin, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

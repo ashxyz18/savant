@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
@@ -10,33 +10,9 @@ import toast from 'react-hot-toast';
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 const FACEBOOK_APP_ID = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '';
 
-// Open an OAuth provider popup and resolve with the returned token.
-const openSocialPopup = (url) =>
-  new Promise((resolve, reject) => {
-    const popup = window.open(url, 'savant-social', 'width=500,height=600');
-    if (!popup) return reject(new Error('Popup blocked'));
-    const timer = setInterval(() => {
-      try {
-        if (popup.closed) {
-          clearInterval(timer);
-          return reject(new Error('Popup closed'));
-        }
-        const loc = popup.location.href;
-        if (loc.includes('localhost') || loc.includes(window.location.host)) {
-          // Google returns id_token in hash; Facebook returns access_token in hash.
-          const hash = new URLSearchParams(popup.location.hash.replace('#', ''));
-          const idToken = hash.get('id_token') || hash.get('access_token');
-          if (idToken) {
-            clearInterval(timer);
-            popup.close();
-            resolve(idToken);
-          }
-        }
-      } catch {
-        // cross-origin until redirect to our domain; ignore
-      }
-    }, 500);
-  });
+// Redirect-based social login. We send the browser (top-level) to the provider;
+// the provider redirects back to /login#id_token=... (or #access_token=...),
+// which we read on mount. This avoids cross-origin popup/COOP issues.
 
 export default function LoginPage() {
   const router = useRouter();
@@ -71,28 +47,46 @@ export default function LoginPage() {
     }
   };
 
-  const handleSocial = async (provider) => {
-    try {
-      setSocialLoading(provider);
-      const redirectUri = `${window.location.origin}/login`;
-      let authUrl;
-      if (provider === 'google') {
-        authUrl =
-          `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}` +
-          `&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=id_token&scope=email%20profile&nonce=${Date.now()}`;
-      } else {
-        authUrl =
-          `https://www.facebook.com/v18.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}` +
-          `&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=email%20public_profile`;
+  // Complete social login if we were redirected back with a token in the hash.
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (!hash) return;
+    const params = new URLSearchParams(hash);
+    const idToken = params.get('id_token') || params.get('access_token');
+    const error = params.get('error');
+    if (error) {
+      toast.error('Social login failed: ' + error);
+      window.history.replaceState(null, '', window.location.pathname);
+      return;
+    }
+    if (!idToken) return;
+    // Clear the hash so a refresh doesn't re-trigger.
+    window.history.replaceState(null, '', window.location.pathname);
+    (async () => {
+      try {
+        setSocialLoading('google');
+        const provider = params.get('id_token') ? 'google' : 'facebook';
+        const data = await socialLogin(provider, idToken, router);
+        toast.success('Welcome!');
+        router.push(data.user.role === 'admin' ? '/admin' : '/');
+      } catch (err) {
+        toast.error(err.message || 'Social login failed');
+      } finally {
+        setSocialLoading('');
       }
-      const token = await openSocialPopup(authUrl);
-      const data = await socialLogin(provider, token);
-      toast.success('Welcome!');
-      router.push(data.user.role === 'admin' ? '/admin' : '/');
-    } catch (error) {
-      toast.error(error.message || 'Social login failed');
-    } finally {
-      setSocialLoading('');
+    })();
+  }, []);
+
+  const handleSocial = (provider) => {
+    const redirectUri = `${window.location.origin}/login`;
+    if (provider === 'google') {
+      window.location.href =
+        `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=id_token&scope=email%20profile&nonce=${Date.now()}`;
+    } else {
+      window.location.href =
+        `https://www.facebook.com/v18.0/dialog/oauth?client_id=${FACEBOOK_APP_ID}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=email%20public_profile`;
     }
   };
 

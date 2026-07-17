@@ -30,6 +30,9 @@ export default function AccountPage() {
     email: '',
     phone: '',
   });
+  const addPhone =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('addPhone') === '1';
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -44,6 +47,11 @@ export default function AccountPage() {
         email: user.email || '',
         phone: user.phone || '',
       });
+      // Social login redirects here when the user has no phone yet.
+      if (addPhone && !user.phone) {
+        setEditProfile(true);
+        router.replace('/account');
+      }
       loadOrders();
     }
   }, [user]);
@@ -193,7 +201,13 @@ export default function AccountPage() {
                 </div>
 
                 {editProfile ? (
-                  <form onSubmit={handleUpdateProfile} className="space-y-6">
+                  <>
+                    {addPhone && !user.phone && (
+                      <div className="mb-6 p-4 bg-primary-50 border border-primary-200 rounded-lg text-sm text-primary-700">
+                        Please add your phone number to complete your account setup.
+                      </div>
+                    )}
+                    <form onSubmit={handleUpdateProfile} className="space-y-6">
                     <div className="grid md:grid-cols-2 gap-6">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -248,6 +262,7 @@ export default function AccountPage() {
                       </button>
                     </div>
                   </form>
+                  </>
                 ) : (
                   <div className="space-y-6">
                     <div className="grid md:grid-cols-2 gap-6">
