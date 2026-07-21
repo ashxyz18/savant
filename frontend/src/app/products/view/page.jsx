@@ -471,11 +471,7 @@ function ProductDetailPage() {
                       <span className="text-neutral-600">Country of Origin</span>
                       <span>Italy</span>
                     </div>
-                  </div>
-                </div>
               </div>
-            )}
-
             )}
           </div>
         </div>
