@@ -3,11 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { TrendingUp, ArrowRight, Flame, Clock, Star } from 'lucide-react';
+import { TrendingUp, ArrowRight, Flame } from 'lucide-react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { getImageUrl } from '../lib/image';
 import { productUrl } from '../lib/routes';
 import api from '../lib/api';
+import { formatBDT } from '../lib/format';
 
 const TrendingNow = () => {
   const router = useRouter();
@@ -133,22 +134,15 @@ const TrendingNow = () => {
                 </div>
 
                 <div className="p-4">
-                  <div className="flex items-center gap-1 mb-1.5">
-                    <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                    <span className="text-xs text-neutral-500">{product.rating?.toFixed(1) || '4.8'}</span>
-                    <span className="text-xs text-neutral-300 mx-1">·</span>
-                    <Clock className="w-3 h-3 text-neutral-400" />
-                    <span className="text-xs text-neutral-400">2-3 days</span>
-                  </div>
                   <h3 className="text-sm font-semibold text-neutral-900 group-hover:text-primary-900 transition-colors duration-300 line-clamp-1 mb-1">
                     {product.name}
                   </h3>
                   <p className="text-xs text-neutral-400 mb-2">{product.material || 'Premium Leather'}</p>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-base font-bold text-neutral-900">${product.price?.toFixed(2)}</span>
+                    <span className="text-base font-bold text-neutral-900">{formatBDT(product.price)}</span>
                     {product.originalPrice && (
                       <span className="text-xs text-neutral-400 line-through">
-                        ${product.originalPrice.toFixed(2)}
+                        {formatBDT(product.originalPrice)}
                       </span>
                     )}
                   </div>

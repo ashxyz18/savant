@@ -114,6 +114,10 @@ class ApiClient {
     });
   }
 
+  bulkCreateProducts(products) {
+    return this.post('/products/bulk', { products });
+  }
+
   updateProduct(id, formData) {
     return this.request(`/products/${id}`, {
       method: 'PUT',

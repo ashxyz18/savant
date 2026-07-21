@@ -6,5 +6,5 @@ export function formatBDT(amount, { decimals = 2 } = {}) {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
-  return `৳${formatted}`;
+  return `৳${formatted} BDT`;
 }

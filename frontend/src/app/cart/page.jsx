@@ -187,18 +187,12 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between text-neutral-600">
                   <span>Shipping</span>
-                  <span>{shippingCost === 0 ? <span className="text-green-600 font-medium">Free</span> : formatBDT(shippingCost)}</span>
+                  <span>{formatBDT(shippingCost)}</span>
                 </div>
                 <div className="flex justify-between text-neutral-600">
                   <span>Tax</span>
                   <span>{formatBDT(tax)}</span>
                 </div>
-                {shippingCost === 0 && (
-                  <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">
-                    <Truck size={14} />
-                    You qualify for free shipping!
-                  </div>
-                )}
                 <div className="border-t border-neutral-200 pt-3 flex justify-between font-bold text-neutral-900 text-base">
                   <span>Total</span>
                   <span>{formatBDT(total)}</span>
@@ -213,10 +207,6 @@ export default function CartPage() {
               </button>
 
               <div className="mt-6 space-y-2">
-                <div className="flex items-center gap-2 text-xs text-neutral-500">
-                  <Truck size={14} className="text-primary-400" />
-                  Free shipping on orders over ৳100
-                </div>
                 <div className="flex items-center gap-2 text-xs text-neutral-500">
                   <Shield size={14} className="text-primary-400" />
                   Secure checkout with SSL encryption

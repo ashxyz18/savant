@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { X, Truck, Gift, Percent } from 'lucide-react';
 
 const announcements = [
-  { icon: <Truck className="w-3.5 h-3.5" />, text: 'Free Shipping on Orders Over $100', highlight: 'Shop Now' },
   { icon: <Gift className="w-3.5 h-3.5" />, text: 'New Members Get 15% Off First Order', highlight: 'Sign Up' },
   { icon: <Percent className="w-3.5 h-3.5" />, text: 'Spring Sale — Up to 40% Off Select Items', highlight: 'View Deals' },
 ];

@@ -11,7 +11,6 @@ import { formatBDT } from '../../../lib/format';
 import {
   ShoppingCart,
   Heart,
-  Star,
   ArrowLeft,
   Minus,
   Plus,
@@ -24,7 +23,6 @@ import {
   ZoomIn,
   Info,
   FileText,
-  MessageSquare,
   X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -258,20 +256,7 @@ function ProductDetailPage() {
             </h1>
 
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={16}
-                    className={i < Math.floor(product.rating || 0)
-                      ? 'fill-neutral-900 text-neutral-900'
-                      : 'text-neutral-200'}
-                  />
-                ))}
-              </div>
-              <span className="text-neutral-500 text-sm">
-                {product.rating?.toFixed(1) || '0.0'} ({product.reviewCount || 0} reviews)
-              </span>
+              <span className="text-sm text-neutral-500">Premium Quality Product</span>
             </div>
 
             <div className="flex items-end gap-3">
@@ -388,13 +373,6 @@ function ProductDetailPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-neutral-200">
               <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-lg">
-                <Truck size={18} className="text-neutral-400" />
-                <div>
-                  <p className="text-xs font-medium text-neutral-800">Free Shipping</p>
-                  <p className="text-xs text-neutral-400">On orders over ৳100</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-lg">
                 <Shield size={18} className="text-neutral-400" />
                 <div>
                   <p className="text-xs font-medium text-neutral-800">2-Year Warranty</p>
@@ -408,6 +386,13 @@ function ProductDetailPage() {
                   <p className="text-xs text-neutral-400">30-day return policy</p>
                 </div>
               </div>
+              <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-lg">
+                <Truck size={18} className="text-neutral-400" />
+                <div>
+                  <p className="text-xs font-medium text-neutral-800">Standard Delivery</p>
+                  <p className="text-xs text-neutral-400">Available nationwide</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -415,33 +400,24 @@ function ProductDetailPage() {
         {/* Tabbed Content Section */}
         <div className="mt-12 pt-8 border-t border-neutral-200">
           <div className="flex border-b border-neutral-200 mb-6">
-            <button
-              onClick={() => setActiveTab('description')}
-              className={`py-3 px-6 font-medium text-sm ${activeTab === 'description' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-500 hover:text-neutral-800'}`}
-            >
-              <div className="flex items-center gap-2">
-                <FileText size={16} />
-                Description
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('specs')}
-              className={`py-3 px-6 font-medium text-sm ${activeTab === 'specs' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-500 hover:text-neutral-800'}`}
-            >
-              <div className="flex items-center gap-2">
-                <Info size={16} />
-                Specifications
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('reviews')}
-              className={`py-3 px-6 font-medium text-sm ${activeTab === 'reviews' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-500 hover:text-neutral-800'}`}
-            >
-              <div className="flex items-center gap-2">
-                <MessageSquare size={16} />
-                Reviews ({product.reviewCount || 0})
-              </div>
-            </button>
+              <button
+                onClick={() => setActiveTab('description')}
+                className={`py-3 px-6 font-medium text-sm ${activeTab === 'description' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-500 hover:text-neutral-800'}`}
+              >
+                <div className="flex items-center gap-2">
+                  <FileText size={16} />
+                  Description
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('specs')}
+                className={`py-3 px-6 font-medium text-sm ${activeTab === 'specs' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-500 hover:text-neutral-800'}`}
+              >
+                <div className="flex items-center gap-2">
+                  <Info size={16} />
+                  Specifications
+                </div>
+              </button>
           </div>
 
           <div className="prose prose-neutral max-w-none">
@@ -500,30 +476,6 @@ function ProductDetailPage() {
               </div>
             )}
 
-            {activeTab === 'reviews' && (
-              <div>
-                <h3 className="font-bold text-lg mb-4">Customer Reviews</h3>
-                <div className="bg-neutral-50 rounded-lg p-6 text-center">
-                  <div className="text-4xl font-bold text-neutral-900 mb-2">
-                    {product.rating?.toFixed(1) || '4.8'}/5
-                  </div>
-                  <div className="flex justify-center mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={20}
-                        className={`${i < Math.floor(product.rating || 4.8) ? 'fill-amber-400 text-amber-400' : 'text-neutral-300'}`}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-neutral-500">
-                    Based on {product.reviewCount || 24} customer reviews
-                  </p>
-                  <button className="mt-4 px-6 py-2 bg-neutral-900 text-white rounded-lg text-sm font-medium hover:bg-neutral-800 transition-colors">
-                    Write a Review
-                  </button>
-                </div>
-              </div>
             )}
           </div>
         </div>
@@ -558,10 +510,10 @@ function ProductDetailPage() {
                   <div className="p-4">
                     <h3 className="font-medium text-neutral-800 text-sm truncate">{p.name}</h3>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="font-bold text-neutral-900 text-sm">${p.price?.toFixed(2)}</span>
+                      <span className="font-bold text-neutral-900 text-sm">{formatBDT(p.price)}</span>
                       {p.originalPrice && (
                         <span className="text-xs text-neutral-400 line-through">
-                          ${p.originalPrice.toFixed(2)}
+                          {formatBDT(p.originalPrice)}
                         </span>
                       )}
                     </div>

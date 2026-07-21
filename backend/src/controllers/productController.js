@@ -48,7 +48,6 @@ export const getProducts = async (req, res) => {
       newest: { createdAt: -1 },
       'price-low': { price: 1 },
       'price-high': { price: -1 },
-      rating: { rating: -1 },
     };
     const sortObj = sortMap[sort] || { createdAt: -1 };
 
@@ -111,13 +110,10 @@ const coerceProductFields = (data) => {
   // filters (which compare against real booleans/numbers) match correctly.
   if (data.isActive !== undefined) data.isActive = data.isActive === true || data.isActive === 'true';
   if (data.featured !== undefined) data.featured = data.featured === true || data.featured === 'true';
-  if (data.fastShipping !== undefined) data.fastShipping = data.fastShipping === true || data.fastShipping === 'true';
   if (data.price !== undefined && data.price !== '') data.price = Number(data.price);
   if (data.originalPrice !== undefined && data.originalPrice !== '') data.originalPrice = Number(data.originalPrice);
   if (data.stock !== undefined && data.stock !== '') data.stock = Number(data.stock);
   if (data.colorCount !== undefined && data.colorCount !== '') data.colorCount = Number(data.colorCount);
-  if (data.rating !== undefined && data.rating !== '') data.rating = Number(data.rating);
-  if (data.reviewCount !== undefined && data.reviewCount !== '') data.reviewCount = Number(data.reviewCount);
   // New products default to active so they appear in the storefront.
   if (data.isActive === undefined) data.isActive = true;
   return data;
@@ -170,6 +166,74 @@ export const createProduct = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Bulk-create products from an array of product objects. Auto-generates slug
+// and SKU (like createProduct) and coerces field types. Skips duplicates that
+// share an existing slug so re-running an import is idempotent.
+export const bulkCreateProducts = async (req, res) => {
+  try {
+    const incoming = Array.isArray(req.body) ? req.body : req.body?.products;
+    if (!Array.isArray(incoming) || incoming.length === 0) {
+      return res.status(400).json({ message: 'Provide a non-empty array of products' });
+    }
+
+    const existingSlugs = new Set(
+      (await Product.find({ slug: { $in: incoming.map((p) => slugify(p.name)) } }).lean()).map((p) => p.slug)
+    );
+
+    const toInsert = [];
+    const skipped = [];
+    const errors = [];
+
+    for (const raw of incoming) {
+      try {
+        if (!raw.name) {
+          errors.push({ row: raw, error: 'name is required' });
+          continue;
+        }
+        const slug = slugify(raw.name);
+        if (existingSlugs.has(slug)) {
+          skipped.push(slug);
+          continue;
+        }
+        const data = coerceProductFields({ ...raw });
+        data.slug = slug;
+        if (!data.sku) data.sku = await generateSKU(data.category);
+        if (typeof data.tags === 'string') {
+          data.tags = data.tags.split(',').map((t) => t.trim()).filter(Boolean);
+        }
+        if (typeof data.colors === 'string') {
+          try { data.colors = JSON.parse(data.colors); } catch { data.colors = []; }
+        }
+        toInsert.push(data);
+        existingSlugs.add(slug);
+      } catch (e) {
+        errors.push({ row: raw, error: e.message });
+      }
+    }
+
+    let inserted = [];
+    if (toInsert.length) {
+      inserted = await Product.create(toInsert);
+    }
+
+    res.status(201).json({
+      created: inserted.length,
+      skipped: skipped.length,
+      errors: errors.length,
+      details: { skipped, errors },
+      products: inserted,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const slugify = (name) =>
+  String(name || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 
 export const updateProduct = async (req, res) => {
   try {

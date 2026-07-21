@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { X, Star, ShoppingCart, Heart, Minus, Plus, Truck, Shield, RotateCcw, Check } from 'lucide-react';
+import { X, ShoppingCart, Heart, Minus, Plus, Truck, Shield, RotateCcw, Check } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { getImageUrl } from '../lib/image';
 import { productUrl } from '../lib/routes';
 import api from '../lib/api';
+import { formatBDT } from '../lib/format';
 import toast from 'react-hot-toast';
 
 const QuickViewModal = ({ productId, isOpen, onClose }) => {
@@ -148,28 +149,16 @@ const QuickViewModal = ({ productId, isOpen, onClose }) => {
               <h2 className="text-2xl font-bold text-neutral-900 mb-3">{product.name}</h2>
 
               <div className="flex items-center gap-2 mb-4">
-                <div className="flex items-center gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-4 h-4 ${
-                        i < Math.floor(product.rating || 0) ? 'text-amber-400 fill-amber-400' : 'text-neutral-200'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-neutral-500">
-                  {product.rating?.toFixed(1) || '0.0'} ({product.reviewCount || 0} reviews)
-                </span>
+                <span className="text-sm text-neutral-500">Premium Quality Product</span>
               </div>
 
               <div className="flex items-end gap-3 mb-4">
-                <span className="text-3xl font-bold text-neutral-900">${product.price?.toFixed(2)}</span>
+                <span className="text-3xl font-bold text-neutral-900">{formatBDT(product.price)}</span>
                 {product.originalPrice && product.originalPrice > product.price && (
                   <>
-                    <span className="text-base text-neutral-400 line-through">${product.originalPrice.toFixed(2)}</span>
+                    <span className="text-base text-neutral-400 line-through">{formatBDT(product.originalPrice)}</span>
                     <span className="text-xs font-semibold text-red-500 bg-red-50 px-2 py-0.5 rounded">
-                      Save ${(product.originalPrice - product.price).toFixed(2)}
+                      Save {formatBDT(product.originalPrice - product.price)}
                     </span>
                   </>
                 )}
@@ -293,16 +282,16 @@ const QuickViewModal = ({ productId, isOpen, onClose }) => {
 
               <div className="grid grid-cols-3 gap-3 pt-5 border-t border-neutral-200 mt-auto">
                 <div className="flex flex-col items-center gap-1.5 p-2 bg-neutral-50 rounded-lg">
-                  <Truck className="w-4 h-4 text-neutral-400" />
-                  <span className="text-[10px] font-medium text-neutral-600 text-center">Free Shipping</span>
-                </div>
-                <div className="flex flex-col items-center gap-1.5 p-2 bg-neutral-50 rounded-lg">
                   <Shield className="w-4 h-4 text-neutral-400" />
                   <span className="text-[10px] font-medium text-neutral-600 text-center">2-Year Warranty</span>
                 </div>
                 <div className="flex flex-col items-center gap-1.5 p-2 bg-neutral-50 rounded-lg">
                   <RotateCcw className="w-4 h-4 text-neutral-400" />
                   <span className="text-[10px] font-medium text-neutral-600 text-center">30-Day Returns</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5 p-2 bg-neutral-50 rounded-lg">
+                  <Truck className="w-4 h-4 text-neutral-400" />
+                  <span className="text-[10px] font-medium text-neutral-600 text-center">Standard Delivery</span>
                 </div>
               </div>
 

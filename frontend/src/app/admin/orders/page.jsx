@@ -227,7 +227,7 @@ export default function AdminOrdersPage() {
                         <span className="text-neutral-300 text-sm">{order.items?.length} item{order.items?.length !== 1 ? 's' : ''}</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-white font-medium">${order.total?.toFixed(2)}</span>
+                        <span className="text-white font-medium">৳{order.total?.toFixed(2)}</span>
                       </td>
                       <td className="px-6 py-4">
                         <select
@@ -384,7 +384,7 @@ export default function AdminOrdersPage() {
                           <p className="text-neutral-500 text-xs">Qty: {item.quantity}</p>
                         </div>
                       </div>
-                      <p className="text-white font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="text-white font-medium">৳{(item.price * item.quantity).toFixed(2)}</p>
                     </div>
                   ))}
                 </div>
@@ -395,19 +395,19 @@ export default function AdminOrdersPage() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-neutral-400">Subtotal</span>
-                    <span className="text-white">${selectedOrder.subtotal?.toFixed(2)}</span>
+                    <span className="text-white">৳{selectedOrder.subtotal?.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-400">Shipping</span>
-                    <span className="text-white">{selectedOrder.shippingCost === 0 ? 'Free' : `$${selectedOrder.shippingCost?.toFixed(2)}`}</span>
+                    <span className="text-white">{selectedOrder.shippingCost === 0 ? 'Free' : `৳${selectedOrder.shippingCost?.toFixed(2)}`}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-400">Tax</span>
-                    <span className="text-white">${selectedOrder.tax?.toFixed(2)}</span>
+                    <span className="text-white">৳{selectedOrder.tax?.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-neutral-700">
                     <span className="text-white font-semibold">Total</span>
-                    <span className="text-white font-bold text-lg">${selectedOrder.total?.toFixed(2)}</span>
+                    <span className="text-white font-bold text-lg">৳{selectedOrder.total?.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

@@ -8,10 +8,8 @@ const products = [
     category: "new",
     emoji: "👜",
     material: "Full-Grain Leather",
-    rating: 4.8,
     stock: 8,
     colorCount: 4,
-    fastShipping: true,
     description: "Compact yet spacious hobo bag with adjustable strap and multiple compartments."
   },
   {
@@ -23,10 +21,8 @@ const products = [
     category: "popular",
     emoji: "👝",
     material: "Vegetable-Tanned Leather",
-    rating: 4.9,
     stock: 15,
     colorCount: 3,
-    fastShipping: true,
     description: "Timeless tote design perfect for work and weekend adventures."
   },
   {
@@ -36,10 +32,8 @@ const products = [
     category: "new",
     emoji: "💼",
     material: "Saffiano Leather",
-    rating: 4.7,
     stock: 5,
     colorCount: 5,
-    fastShipping: false,
     description: "Hands-free crossbody with RFID protection and organized interior."
   },
   {
@@ -49,10 +43,8 @@ const products = [
     category: "popular",
     emoji: "🧳",
     material: "Aged Leather",
-    rating: 4.6,
     stock: 3,
     colorCount: 2,
-    fastShipping: true,
     description: "Vintage-inspired satchel with brass hardware and distressed finish."
   },
   {
@@ -64,10 +56,8 @@ const products = [
     category: "new",
     emoji: "🎒",
     material: "Nubuck Leather",
-    rating: 4.8,
     stock: 12,
     colorCount: 6,
-    fastShipping: true,
     description: "Modern mini backpack with laptop sleeve and water-resistant lining."
   },
   {
@@ -77,10 +67,8 @@ const products = [
     category: "popular",
     emoji: "💼",
     material: "Italian Leather",
-    rating: 4.9,
     stock: 7,
     colorCount: 3,
-    fastShipping: true,
     description: "Professional briefcase with combination lock and document organizer."
   },
   {
@@ -92,10 +80,8 @@ const products = [
     category: "sale",
     emoji: "🧳",
     material: "Waxed Canvas & Leather",
-    rating: 4.7,
     stock: 10,
     colorCount: 4,
-    fastShipping: true,
     description: "Spacious weekender duffel with shoe compartment and toiletry pocket."
   },
   {
@@ -105,10 +91,8 @@ const products = [
     category: "new",
     emoji: "👛",
     material: "Croc-Embossed Leather",
-    rating: 4.5,
     stock: 20,
     colorCount: 8,
-    fastShipping: false,
     description: "Convertible clutch with detachable chain for evening or day use."
   },
   {
@@ -118,10 +102,8 @@ const products = [
     category: "popular",
     emoji: "🪣",
     material: "Suede & Leather",
-    rating: 4.8,
     stock: 6,
     colorCount: 3,
-    fastShipping: true,
     description: "Trendy bucket bag with drawstring closure and interior pockets."
   },
   {
@@ -133,10 +115,8 @@ const products = [
     category: "sale",
     emoji: "📨",
     material: "Waxed Leather",
-    rating: 4.6,
     stock: 9,
     colorCount: 4,
-    fastShipping: true,
     description: "Classic messenger bag with adjustable strap and quick-access pocket."
   },
   {
@@ -146,10 +126,8 @@ const products = [
     category: "new",
     emoji: "💻",
     material: "Neoprene & Leather",
-    rating: 4.7,
     stock: 14,
     colorCount: 5,
-    fastShipping: true,
     description: "Slim laptop sleeve with extra storage for accessories and documents."
   },
   {
@@ -161,10 +139,8 @@ const products = [
     category: "popular",
     emoji: "🎒",
     material: "Waterproof Leather",
-    rating: 4.9,
     stock: 4,
     colorCount: 3,
-    fastShipping: true,
     description: "Expandable travel backpack with USB port and hidden compartments."
   }
 ];

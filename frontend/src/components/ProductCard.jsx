@@ -3,10 +3,11 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Heart, ShoppingCart, Star, Eye, Zap, Check, ArrowRight } from 'lucide-react';
+import { Heart, ShoppingCart, Eye, Check, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { getImageUrl } from '../lib/image';
 import { productUrl } from '../lib/routes';
+import { formatBDT } from '../lib/format';
 import toast from 'react-hot-toast';
 
 const ProductCard = ({ product, onQuickView }) => {
@@ -156,17 +157,8 @@ const ProductCard = ({ product, onQuickView }) => {
         </button>
 
         {discount > 0 && (
-          <div className="absolute bottom-3 left-3 bg-red-500 text-white px-2.5 py-1 rounded-md text-xs font-bold shadow-sm">
+          <div className={`absolute bottom-3 left-3 bg-red-500 text-white px-2.5 py-1 rounded-md text-xs font-bold shadow-sm`}>
             -{discount}%
-          </div>
-        )}
-
-        {product.fastShipping && (
-          <div className={`absolute bottom-3 right-3 bg-white px-2 py-1 rounded-md flex items-center gap-1 shadow-sm transition-all duration-300 ${
-            isHovered ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
-          }`}>
-            <Zap className="w-3 h-3 text-amber-500" />
-            <span className="text-[10px] font-medium text-neutral-600">Fast</span>
           </div>
         )}
       </div>
@@ -176,10 +168,6 @@ const ProductCard = ({ product, onQuickView }) => {
           <h3 className="text-sm font-semibold text-neutral-900 group-hover:text-primary-900 transition-colors duration-300 line-clamp-1">
             {product.name}
           </h3>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-            <span className="text-xs font-medium text-neutral-700">{product.rating?.toFixed(1) || '4.8'}</span>
-          </div>
         </div>
 
         <p className="text-xs text-neutral-500 mb-3">{product.material || 'Premium Leather'}</p>
@@ -201,9 +189,9 @@ const ProductCard = ({ product, onQuickView }) => {
         )}
 
         <div className="flex items-baseline gap-2 mb-4">
-          <span className="text-lg font-bold text-neutral-900">${product.price?.toFixed(2) || product.price}</span>
+          <span className="text-lg font-bold text-neutral-900">{formatBDT(product.price)}</span>
           {product.originalPrice && (
-            <span className="text-xs text-neutral-400 line-through">${product.originalPrice.toFixed(2)}</span>
+            <span className="text-xs text-neutral-400 line-through">{formatBDT(product.originalPrice)}</span>
           )}
         </div>
 

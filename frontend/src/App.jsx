@@ -11,10 +11,6 @@ import FilterTabs from './components/FilterTabs';
 import ProductGrid from './components/ProductGrid';
 import { useScrollPosition } from './hooks/useScrollReveal';
 
-const Testimonials = dynamic(() => import('./components/Testimonials'), {
-  loading: () => <div className="py-20 bg-neutral-50" />,
-});
-
 const Features = dynamic(() => import('./components/Features'), {
   loading: () => <div className="py-20 bg-white" />,
 });
@@ -84,7 +80,6 @@ function App() {
         setActiveFilter={handleFilterChange}
       />
       <ProductGrid activeFilter={activeFilter} activeSubcategory={activeSubcategory} onQuickView={openQuickView} />
-      <Testimonials />
       <Features />
       <RecentlyViewed />
       

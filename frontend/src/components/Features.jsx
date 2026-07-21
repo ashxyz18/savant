@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Truck, CreditCard, RefreshCw, Shield, Headphones, Gift, ArrowRight, Sparkles } from 'lucide-react';
+import { CreditCard, RefreshCw, Shield, Headphones, Gift, ArrowRight, Sparkles } from 'lucide-react';
 import { useScrollReveal, useCountUp } from '../hooks/useScrollReveal';
 
 const FeatureCard = ({ feature, index }) => {
@@ -56,11 +56,6 @@ const Features = () => {
   const [ctaRef, ctaRevealed] = useScrollReveal({ threshold: 0.2 });
 
   const features = [
-    {
-      icon: <Truck className="w-5 h-5" />,
-      title: 'Free Express Delivery',
-      description: 'Free shipping on orders over $100. Delivery within 2-3 business days.',
-    },
     {
       icon: <CreditCard className="w-5 h-5" />,
       title: 'Flexible Payment',
@@ -153,8 +148,7 @@ const Features = () => {
               Join Our Premium Membership
             </h3>
             <p className="text-primary-200 mb-10 max-w-xl mx-auto">
-              Get exclusive access to early sales, member-only discounts, free shipping on all orders,
-              and personalized style recommendations.
+               Get exclusive access to early sales, member-only discounts, and personalized style recommendations.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">

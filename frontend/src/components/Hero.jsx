@@ -60,7 +60,7 @@ const Hero = () => {
 
   const features = [
     { icon: <Shield className="w-4 h-4" />, text: '2-Year Warranty' },
-    { icon: <Truck className="w-4 h-4" />, text: 'Free Shipping' },
+    { icon: <Truck className="w-4 h-4" />, text: 'Reliable Delivery' },
     { icon: <RotateCcw className="w-4 h-4" />, text: '30-Day Returns' },
   ];
 
@@ -72,12 +72,12 @@ const Hero = () => {
     <section
       ref={heroRef}
       onMouseMove={handleMouseMove}
-      className="relative overflow-hidden bg-neutral-50"
+      className="relative overflow-hidden bg-neutral-50 min-h-[100svh] sm:min-h-[85vh]"
     >
       {/* Full-bleed background video */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 h-full w-full">
         <video
-          className="w-full h-full object-cover"
+          className="h-full w-full object-cover object-center"
           src="/hero-video.mp4"
           autoPlay
           muted
@@ -109,7 +109,7 @@ const Hero = () => {
       </div>
 
       <div className="container relative z-20">
-        <div className="flex flex-col items-start justify-end text-left min-h-[85vh] py-24">
+        <div className="flex min-h-[100svh] sm:min-h-[85vh] flex-col items-start justify-end py-24 text-left">
           <div className={`max-w-3xl transition-all duration-1000 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}>
@@ -168,7 +168,6 @@ const Hero = () => {
               {[
                 { value: '500+', label: 'Happy Customers' },
                 { value: '4.9', label: 'Average Rating' },
-                { value: '24h', label: 'Delivery Time' },
               ].map((stat, i) => (
                 <React.Fragment key={i}>
                   {i > 0 && <div className="w-px h-10 bg-white/20" />}

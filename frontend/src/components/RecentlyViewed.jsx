@@ -8,6 +8,7 @@ import { useScrollReveal } from '../hooks/useScrollReveal';
 import { getImageUrl } from '../lib/image';
 import { productUrl } from '../lib/routes';
 import api from '../lib/api';
+import { formatBDT } from '../lib/format';
 
 const RecentlyViewed = () => {
   const router = useRouter();
@@ -111,9 +112,9 @@ const RecentlyViewed = () => {
                     {product.name}
                   </h4>
                   <div className="flex items-baseline gap-1.5 mt-1">
-                    <span className="text-sm font-bold text-neutral-900">${product.price?.toFixed(2)}</span>
+                    <span className="text-sm font-bold text-neutral-900">{formatBDT(product.price)}</span>
                     {product.originalPrice && (
-                      <span className="text-[10px] text-neutral-400 line-through">${product.originalPrice.toFixed(2)}</span>
+                      <span className="text-[10px] text-neutral-400 line-through">{formatBDT(product.originalPrice)}</span>
                     )}
                   </div>
                 </div>

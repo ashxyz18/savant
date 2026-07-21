@@ -25,6 +25,7 @@ export default function AdminProductsPage() {
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -41,7 +42,6 @@ export default function AdminProductsPage() {
     material: 'Premium Leather',
     stock: '10',
     colorCount: '3',
-    fastShipping: false,
     featured: false,
     isActive: true,
     tags: '',
@@ -83,7 +83,6 @@ export default function AdminProductsPage() {
       material: 'Premium Leather',
       stock: '10',
       colorCount: '3',
-      fastShipping: false,
       featured: false,
       isActive: true,
       tags: '',
@@ -113,7 +112,6 @@ export default function AdminProductsPage() {
       material: product.material || 'Premium Leather',
       stock: product.stock.toString(),
       colorCount: (product.colorCount || 3).toString(),
-      fastShipping: product.fastShipping || false,
       featured: product.featured || false,
       isActive: product.isActive,
       tags: product.tags?.join(', ') || '',
@@ -158,7 +156,6 @@ export default function AdminProductsPage() {
       formData.append('material', form.material);
       formData.append('stock', form.stock);
       formData.append('colorCount', form.colorCount);
-      formData.append('fastShipping', form.fastShipping);
       formData.append('featured', form.featured);
       formData.append('isActive', form.isActive);
       formData.append('tags', form.tags);
@@ -180,6 +177,103 @@ export default function AdminProductsPage() {
       toast.error(error.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const [importFile, setImportFile] = useState(null);
+  const [importing, setImporting] = useState(false);
+
+  const importTemplate = () => {
+    const sample = [
+      {
+        name: 'Classic Tote Bag',
+        description: 'Timeless tote design perfect for work and weekend.',
+        shortDescription: 'Timeless tote for work and weekend',
+        price: 220,
+        originalPrice: 280,
+        category: 'women',
+        subcategory: 'Handbags',
+        material: 'Vegetable-Tanned Leather',
+        stock: 15,
+        colorCount: 3,
+        featured: true,
+        isActive: true,
+        tags: 'tote, classic, work',
+      },
+    ];
+    const blob = new Blob([JSON.stringify(sample, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'products-template.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const parseImportFile = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const text = reader.result;
+          if (file.name.endsWith('.csv')) {
+            resolve(parseCSV(text));
+          } else {
+            const data = JSON.parse(text);
+            resolve(Array.isArray(data) ? data : data.products);
+          }
+        } catch (e) {
+          reject(e);
+        }
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(file);
+    });
+  };
+
+  const parseCSV = (csv) => {
+    const lines = csv.trim().split('\n');
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(',').map((h) => h.trim());
+    const boolFields = ['featured', 'isActive'];
+    return lines.slice(1).map((line) => {
+      const cells = line.split(',');
+      const obj = {};
+      headers.forEach((h, i) => {
+        let v = (cells[i] || '').trim();
+        if (boolFields.includes(h)) v = v.toLowerCase() === 'true' || v === '1';
+        else if (!isNaN(v) && v !== '') v = Number(v);
+        obj[h] = v;
+      });
+      return obj;
+    });
+  };
+
+  const handleImport = async () => {
+    if (!importFile) {
+      toast.error('Choose a JSON or CSV file first');
+      return;
+    }
+    setImporting(true);
+    try {
+      const products = await parseImportFile(importFile);
+      if (!products || products.length === 0) {
+        toast.error('No products found in file');
+        return;
+      }
+      const result = await api.bulkCreateProducts(products);
+      toast.success(
+        `Imported ${result.created} product(s)` +
+          (result.skipped ? `, skipped ${result.skipped} duplicate(s)` : '') +
+          (result.errors ? `, ${result.errors} error(s)` : '')
+      );
+      setShowImport(false);
+      setImportFile(null);
+      loadProducts();
+    } catch (error) {
+      toast.error(error.message || 'Import failed');
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -226,13 +320,22 @@ export default function AdminProductsPage() {
           <h1 className="text-2xl font-bold text-white">Products</h1>
           <p className="text-neutral-400 text-sm mt-1">{total} total products</p>
         </div>
-        <button
-          onClick={openCreate}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Add Product
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowImport(true)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white font-medium rounded-xl transition-colors"
+          >
+            <Upload className="w-5 h-5" />
+            Bulk Import
+          </button>
+          <button
+            onClick={openCreate}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Add Product
+          </button>
+        </div>
       </div>
 
       {/* Search */}
@@ -311,9 +414,9 @@ export default function AdminProductsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div>
-                        <p className="text-white font-medium">${product.price}</p>
+                        <p className="text-white font-medium">৳{product.price}</p>
                         {product.originalPrice && (
-                          <p className="text-neutral-500 text-sm line-through">${product.originalPrice}</p>
+                          <p className="text-neutral-500 text-sm line-through">৳{product.originalPrice}</p>
                         )}
                       </div>
                     </td>
@@ -436,7 +539,7 @@ export default function AdminProductsPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-neutral-300 mb-2">Price ($) *</label>
+                       <label className="block text-sm font-medium text-neutral-300 mb-2">Price (৳) *</label>
                       <input
                         type="number"
                         step="0.01"
@@ -447,7 +550,7 @@ export default function AdminProductsPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-neutral-300 mb-2">Original Price ($)</label>
+                       <label className="block text-sm font-medium text-neutral-300 mb-2">Original Price (৳)</label>
                       <input
                         type="number"
                         step="0.01"
@@ -551,15 +654,6 @@ export default function AdminProductsPage() {
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={form.fastShipping}
-                        onChange={(e) => setForm(f => ({ ...f, fastShipping: e.target.checked }))}
-                        className="w-5 h-5 rounded border-neutral-600 bg-neutral-800 text-primary-500 focus:ring-primary-500"
-                      />
-                      <span className="text-neutral-300">Fast Shipping</span>
-                    </label>
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
                         checked={form.featured}
                         onChange={(e) => setForm(f => ({ ...f, featured: e.target.checked }))}
                         className="w-5 h-5 rounded border-neutral-600 bg-neutral-800 text-primary-500 focus:ring-primary-500"
@@ -630,6 +724,60 @@ export default function AdminProductsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Import Modal */}
+      {showImport && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70" onClick={() => setShowImport(false)} />
+          <div className="relative bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-white">Bulk Import Products</h2>
+              <button onClick={() => setShowImport(false)} className="text-neutral-400 hover:text-white transition-colors">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <p className="text-sm text-neutral-400 mb-4">
+              Upload a <span className="text-neutral-200">.json</span> or <span className="text-neutral-200">.csv</span> file.
+              Each row needs at least a <span className="text-neutral-200">name</span> and <span className="text-neutral-200">price</span>.
+              Duplicate names (by slug) are skipped.
+            </p>
+
+            <label className="block text-sm font-medium text-neutral-300 mb-2">File</label>
+            <input
+              type="file"
+              accept=".json,.csv"
+              onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+              className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary-500 file:text-white file:cursor-pointer"
+            />
+
+            <button
+              onClick={importTemplate}
+              className="mt-3 text-sm text-primary-400 hover:text-primary-300 underline"
+            >
+              Download JSON template
+            </button>
+
+            <div className="flex items-center justify-end gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => setShowImport(false)}
+                className="px-6 py-2.5 text-neutral-400 hover:text-white font-medium rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleImport}
+                disabled={importing}
+                className="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
+              >
+                {importing ? 'Importing...' : 'Import Products'}
+              </button>
+            </div>
           </div>
         </div>
       )}
