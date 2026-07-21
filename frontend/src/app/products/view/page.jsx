@@ -475,6 +475,7 @@ function ProductDetailPage() {
                 </div>
               </div>
             )}
+            {/* Force new commit for Vercel deployment */}
           </div>
         </div>
 
