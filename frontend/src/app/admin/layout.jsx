@@ -158,39 +158,48 @@ export default function AdminLayout({ children }) {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-neutral-900/80 backdrop-blur-xl border-b border-neutral-800">
-          <div className="flex items-center justify-between px-6 py-4">
-            <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-30 bg-neutral-900/90 backdrop-blur-xl border-b border-neutral-800/80">
+          <div className="flex items-center justify-between px-6 py-3.5">
+            <div className="flex items-center gap-4 flex-1">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden text-neutral-400 hover:text-white"
+                className="lg:hidden text-neutral-400 hover:text-white p-1 rounded-lg hover:bg-neutral-800"
               >
                 <Menu className="w-6 h-6" />
               </button>
               <div>
-                <h1 className="text-lg font-bold text-white">
+                <h1 className="text-lg font-bold text-white flex items-center gap-2">
                   {navItems.find((item) => pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href)))?.label || 'Dashboard'}
                 </h1>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <button className="relative p-2.5 rounded-xl text-neutral-400 hover:text-white hover:bg-white/5 transition-all">
+              <a
+                href="/"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-neutral-300 bg-neutral-800/80 hover:bg-neutral-800 border border-neutral-700/60 transition-all shadow-sm"
+              >
+                <span>Live Store</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              </a>
+
+              <button
+                onClick={() => toast('System Notifications: All systems running smoothly', { icon: '🔔' })}
+                className="relative p-2.5 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all"
+                title="Notifications"
+              >
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary-500 rounded-full"></span>
+                <span className="absolute top-2 right-2 w-2 h-2 bg-[#7B1E3B] rounded-full ring-2 ring-neutral-900" />
               </button>
+
               <button
                 onClick={() => router.push('/admin/settings')}
-                className="p-2.5 rounded-xl text-neutral-400 hover:text-white hover:bg-white/5 transition-all"
+                className="p-2.5 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all"
+                title="Admin Settings"
               >
                 <Settings className="w-5 h-5" />
-              </button>
-              <div className="hidden sm:block h-8 w-px bg-neutral-800"></div>
-              <button
-                onClick={() => router.push('/')}
-                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-neutral-400 hover:text-white hover:bg-white/5 transition-all"
-              >
-                View Store
               </button>
             </div>
           </div>

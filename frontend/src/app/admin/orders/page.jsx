@@ -486,6 +486,19 @@ export default function AdminOrdersPage() {
                   <p className="text-neutral-300 text-sm">{selectedOrder.notes}</p>
                 </div>
               )}
+
+              {/* Invoice Action */}
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.print();
+                  }}
+                  className="px-5 py-2.5 bg-[#7B1E3B] hover:bg-[#651828] text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-2"
+                >
+                  📄 Print Order Invoice
+                </button>
+              </div>
             </div>
           </div>
         </div>
