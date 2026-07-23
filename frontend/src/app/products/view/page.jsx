@@ -23,7 +23,8 @@ import {
   ZoomIn,
   Info,
   FileText,
-  X
+  X,
+  Star
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
