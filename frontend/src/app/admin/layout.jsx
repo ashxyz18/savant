@@ -92,12 +92,12 @@ export default function AdminLayout({ children }) {
           {/* Logo */}
           <div className="flex items-center justify-between p-6 border-b border-neutral-800">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-[#7B1E3B] to-[#501224] rounded-xl flex items-center justify-center shadow-md shadow-[#7B1E3B]/30">
+                <span className="text-white font-bold text-xl">S</span>
               </div>
               <div>
-                <span className="font-display text-xl font-bold text-white">SAVANT</span>
-                <p className="text-xs text-neutral-500">Admin Panel</p>
+                <span className="font-display text-xl font-bold text-white tracking-wider">SAVANT</span>
+                <p className="text-xs text-neutral-400 font-medium">Admin Control Center</p>
               </div>
             </div>
             <button
@@ -109,7 +109,7 @@ export default function AdminLayout({ children }) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
             {navItems.map((item) => {
               const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
               return (
@@ -121,13 +121,13 @@ export default function AdminLayout({ children }) {
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                     isActive
-                      ? 'bg-primary-500/10 text-primary-400 border border-primary-500/20'
+                      ? 'bg-[#7B1E3B] text-white shadow-lg shadow-[#7B1E3B]/25 font-semibold'
                       : 'text-neutral-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   <item.icon className="w-5 h-5" />
                   <span>{item.label}</span>
-                  {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
+                  {isActive && <ChevronRight className="w-4 h-4 ml-auto opacity-70" />}
                 </button>
               );
             })}

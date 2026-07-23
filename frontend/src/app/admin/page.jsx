@@ -77,7 +77,7 @@ function CustomTooltip({ active, payload, label }) {
       <p className="text-xs text-neutral-400 mb-1">{label}</p>
       {payload.map((entry, i) => (
         <p key={i} className="text-sm font-semibold text-white">
-          {entry.name === 'revenue' ? '$' : ''}
+          {entry.name === 'revenue' ? '৳' : ''}
           {entry.value.toLocaleString()}
         </p>
       ))}
@@ -140,15 +140,48 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Quick Action Header Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-neutral-900 via-neutral-900 to-[#7B1E3B]/20 p-6 rounded-2xl border border-neutral-800">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-1">Admin Control Center</h1>
+          <p className="text-xs text-neutral-400">Manage orders, product inventory, categories & system settings</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href="/admin/products"
+            className="px-4 py-2.5 bg-[#7B1E3B] hover:bg-[#651828] text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-2"
+          >
+            <Package className="w-4 h-4" />
+            + Add Product
+          </a>
+          <a
+            href="/admin/orders"
+            className="px-4 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold rounded-xl border border-neutral-700 transition-all flex items-center gap-2"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            Orders ({stats?.orders?.pending || 0} Pending)
+          </a>
+          <a
+            href="/"
+            target="_blank"
+            rel="noreferrer"
+            className="px-4 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-bold rounded-xl border border-neutral-700 transition-all flex items-center gap-2"
+          >
+            <ArrowUpRight className="w-4 h-4" />
+            View Store
+          </a>
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Revenue"
-          value={`$${stats.revenue.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-          subtitle={`$${stats.revenue.monthly.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} this month`}
+          value={`৳${stats.revenue.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          subtitle={`৳${stats.revenue.monthly.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} this month`}
           icon={DollarSign}
           trend={stats.revenue.growth}
-          color="bg-emerald-600"
+          color="bg-[#7B1E3B]"
         />
         <StatCard
           title="Total Orders"
@@ -162,7 +195,7 @@ export default function AdminDashboard() {
           value={stats.products.total.toLocaleString()}
           subtitle={`${stats.products.lowStock} low stock · ${stats.products.outOfStock} out of stock`}
           icon={Package}
-          color="bg-primary-600"
+          color="bg-emerald-600"
         />
         <StatCard
           title="Customers"
@@ -189,7 +222,7 @@ export default function AdminDashboard() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
                 <XAxis dataKey="date" stroke="#525252" tick={{ fontSize: 12 }} />
-                <YAxis stroke="#525252" tick={{ fontSize: 12 }} tickFormatter={(v) => `$${v}`} />
+                <YAxis stroke="#525252" tick={{ fontSize: 12 }} tickFormatter={(v) => `৳${v}`} />
                 <Tooltip content={<CustomTooltip />} />
                 <Area
                   type="monotone"
@@ -289,7 +322,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-semibold text-white">
-                      ${order.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      ৳{order.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </p>
                     <span
                       className="inline-block text-xs px-2 py-0.5 rounded-full font-medium"
@@ -329,7 +362,7 @@ export default function AdminDashboard() {
                     <div className="text-right">
                       <span className="text-sm font-medium text-white">{product.totalSold} sold</span>
                       <span className="text-xs text-neutral-500 ml-2">
-                        ${product.revenue.toLocaleString()}
+                        ৳{product.revenue.toLocaleString()}
                       </span>
                     </div>
                   </div>

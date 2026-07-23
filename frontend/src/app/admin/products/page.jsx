@@ -354,7 +354,7 @@ export default function AdminProductsPage() {
           </button>
           <button
             onClick={openCreate}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#7B1E3B] hover:bg-[#651828] text-white font-medium rounded-xl transition-all shadow-md"
           >
             <Plus className="w-5 h-5" />
             Add Product
