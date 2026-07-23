@@ -85,12 +85,15 @@ export default function CheckoutPage() {
     try {
       setPlacing(true);
       const orderData = {
-        items: items.map(({ product, quantity }) => ({
+        items: items.map(({ product, quantity, selectedSize, selectedColor }) => ({
           product: product._id,
           name: product.name,
           price: product.price,
           quantity,
           image: product.images?.[0] || '',
+          selectedSize: selectedSize || '',
+          selectedColor: selectedColor || '',
+          sku: product.sku || '',
         })),
         shippingAddress: {
           firstName: shipping.firstName,

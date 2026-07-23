@@ -37,6 +37,7 @@ function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(0);
+  const [selectedSize, setSelectedSize] = useState(0);
   const [activeImage, setActiveImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -91,12 +92,20 @@ function ProductDetailPage() {
   };
 
   const handleAddToCart = () => {
-    addItem(product, quantity);
+    const chosenColor = product?.colors && product.colors.length > 0
+      ? (typeof product.colors[selectedColor] === 'object' ? product.colors[selectedColor].name : product.colors[selectedColor])
+      : null;
+    const chosenSize = product?.sizes && product.sizes.length > 0 ? product.sizes[selectedSize] : null;
+    addItem(product, quantity, chosenSize, chosenColor);
     toast.success(`${product.name} added to cart`);
   };
 
   const handleBuyNow = () => {
-    addItem(product, quantity);
+    const chosenColor = product?.colors && product.colors.length > 0
+      ? (typeof product.colors[selectedColor] === 'object' ? product.colors[selectedColor].name : product.colors[selectedColor])
+      : null;
+    const chosenSize = product?.sizes && product.sizes.length > 0 ? product.sizes[selectedSize] : null;
+    addItem(product, quantity, chosenSize, chosenColor);
     router.push('/cart');
   };
 
@@ -276,8 +285,43 @@ function ProductDetailPage() {
             </div>
 
             <div className="pt-4 border-t border-neutral-100">
+              {/* Physical Dimensions */}
+              {product.dimensions && (product.dimensions.height || product.dimensions.width) && (
+                <div className="text-sm text-neutral-600 mb-5 bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                  <span className="font-semibold text-neutral-900">Dimensions (H × W × D):</span>{' '}
+                  <span className="font-mono text-neutral-800 font-medium">
+                    {[product.dimensions.height, product.dimensions.width, product.dimensions.depth].filter(Boolean).join(' × ')} {product.dimensions.unit || 'in'}
+                  </span>
+                </div>
+              )}
+
+              {/* Size Selector */}
+              {product.sizes && product.sizes.length > 0 && (
+                <div className="mb-5">
+                  <span className="block text-sm font-medium text-neutral-800 mb-3">
+                    Size: <span className="font-bold text-neutral-900">{product.sizes[selectedSize]}</span>
+                  </span>
+                  <div className="flex flex-wrap gap-2.5">
+                    {product.sizes.map((size, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedSize(idx)}
+                        className={`px-4 py-2 rounded-md text-sm font-semibold border transition-all ${
+                          selectedSize === idx
+                            ? 'border-neutral-900 bg-neutral-900 text-white shadow-sm'
+                            : 'border-neutral-200 text-neutral-700 hover:border-neutral-400 bg-white'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Color Selector */}
               {product.colors && product.colors.length > 0 && (
-                <div className="mb-4">
+                <div className="mb-5">
                   <span className="block text-sm font-medium text-neutral-800 mb-3">
                     Color: {typeof product.colors[selectedColor] === 'object' ? product.colors[selectedColor].name : product.colors[selectedColor]}
                   </span>

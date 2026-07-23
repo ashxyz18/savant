@@ -16,6 +16,7 @@ const QuickViewModal = ({ productId, isOpen, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(0);
+  const [selectedSize, setSelectedSize] = useState(0);
   const [activeImage, setActiveImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
@@ -25,6 +26,7 @@ const QuickViewModal = ({ productId, isOpen, onClose }) => {
       loadProduct();
       setQuantity(1);
       setSelectedColor(0);
+      setSelectedSize(0);
       setActiveImage(0);
       setAddedToCart(false);
     }
@@ -56,7 +58,11 @@ const QuickViewModal = ({ productId, isOpen, onClose }) => {
 
   const handleAddToCart = () => {
     if (!product) return;
-    addItem(product, quantity);
+    const chosenColor = product.colors && product.colors.length > 0
+      ? (typeof product.colors[selectedColor] === 'object' ? product.colors[selectedColor].name : product.colors[selectedColor])
+      : null;
+    const chosenSize = product.sizes && product.sizes.length > 0 ? product.sizes[selectedSize] : null;
+    addItem(product, quantity, chosenSize, chosenColor);
     setAddedToCart(true);
     toast.success(`${product.name} added to cart`);
     setTimeout(() => setAddedToCart(false), 2000);
@@ -64,7 +70,11 @@ const QuickViewModal = ({ productId, isOpen, onClose }) => {
 
   const handleBuyNow = () => {
     if (!product) return;
-    addItem(product, quantity);
+    const chosenColor = product.colors && product.colors.length > 0
+      ? (typeof product.colors[selectedColor] === 'object' ? product.colors[selectedColor].name : product.colors[selectedColor])
+      : null;
+    const chosenSize = product.sizes && product.sizes.length > 0 ? product.sizes[selectedSize] : null;
+    addItem(product, quantity, chosenSize, chosenColor);
     onClose();
     window.location.href = '/checkout';
   };
@@ -169,11 +179,47 @@ const QuickViewModal = ({ productId, isOpen, onClose }) => {
               </p>
 
               {product.material && (
-                <div className="text-sm text-neutral-500 mb-4">
+                <div className="text-sm text-neutral-500 mb-3">
                   <span className="font-medium text-neutral-800">Material:</span> {product.material}
                 </div>
               )}
 
+              {/* Physical Dimensions */}
+              {product.dimensions && (product.dimensions.height || product.dimensions.width) && (
+                <div className="text-sm text-neutral-500 mb-4 bg-neutral-50 p-2.5 rounded-lg border border-neutral-200">
+                  <span className="font-medium text-neutral-800">Dimensions:</span>{' '}
+                  <span className="font-mono text-neutral-700">
+                    {[product.dimensions.height, product.dimensions.width, product.dimensions.depth].filter(Boolean).join(' × ')} {product.dimensions.unit || 'in'}
+                  </span>
+                  <span className="text-xs text-neutral-400 block mt-0.5">(H × W × D)</span>
+                </div>
+              )}
+
+              {/* Sizes selector */}
+              {product.sizes && product.sizes.length > 0 && (
+                <div className="mb-4">
+                  <span className="block text-sm font-medium text-neutral-800 mb-2">
+                    Size: <span className="font-bold text-neutral-900">{product.sizes[selectedSize]}</span>
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {product.sizes.map((size, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedSize(idx)}
+                        className={`px-3.5 py-1.5 rounded-md text-xs font-semibold border transition-all ${
+                          selectedSize === idx
+                            ? 'border-primary-900 bg-primary-900 text-white shadow-sm'
+                            : 'border-neutral-200 text-neutral-700 hover:border-neutral-400 bg-white'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Colors selector */}
               {product.colors && product.colors.length > 0 && (
                 <div className="mb-4">
                   <span className="block text-sm font-medium text-neutral-800 mb-2">

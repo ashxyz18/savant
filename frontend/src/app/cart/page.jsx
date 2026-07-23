@@ -102,9 +102,18 @@ export default function CartPage() {
                   {product.material && (
                     <p className="text-sm text-neutral-500 mt-0.5">{product.material}</p>
                   )}
-                  {product.colors && product.colors.length > 0 && (
-                    <p className="text-sm text-neutral-500 mt-0.5">Color: {typeof product.colors[0] === 'object' ? product.colors[0].name : product.colors[0]}</p>
-                  )}
+                  <div className="flex items-center gap-2 flex-wrap mt-1">
+                    {item.selectedSize && (
+                      <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-200">
+                        Size: {item.selectedSize}
+                      </span>
+                    )}
+                    {item.selectedColor && (
+                      <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-200">
+                        Color: {item.selectedColor}
+                      </span>
+                    )}
+                  </div>
 
                   <div className="flex items-end justify-between mt-4">
                     <div className="flex items-center border border-neutral-200 rounded-lg">

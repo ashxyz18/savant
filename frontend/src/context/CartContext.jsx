@@ -36,17 +36,24 @@ export const CartProvider = ({ children }) => {
     }
   }, [items, isLoaded]);
 
-  const addItem = useCallback((product, quantity = 1) => {
+  const addItem = useCallback((product, quantity = 1, selectedSize = null, selectedColor = null) => {
     setItems((prev) => {
-      const existing = prev.find((item) => item.product._id === product._id);
+      const existing = prev.find(
+        (item) =>
+          item.product._id === product._id &&
+          item.selectedSize === selectedSize &&
+          item.selectedColor === selectedColor
+      );
       if (existing) {
         return prev.map((item) =>
-          item.product._id === product._id
+          item.product._id === product._id &&
+          item.selectedSize === selectedSize &&
+          item.selectedColor === selectedColor
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      return [...prev, { product, quantity }];
+      return [...prev, { product, quantity, selectedSize, selectedColor }];
     });
   }, []);
 
