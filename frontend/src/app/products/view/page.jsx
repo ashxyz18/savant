@@ -151,24 +151,27 @@ function ProductDetailPage() {
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform duration-200" />
           Back
         </button>
-        <nav className="flex items-center gap-2 text-sm text-neutral-400">
-          <button onClick={() => router.push('/')} className="hover:text-neutral-900 transition-colors">
+        <nav className="flex items-center gap-2 text-sm text-neutral-400 font-medium">
+          <button onClick={() => router.push('/')} className="hover:text-[#7B1E3B] transition-colors">
             Home
           </button>
           <ChevronRight size={14} />
-          <span className="capitalize">{product.category}</span>
+          <button onClick={() => router.push(`/products?category=${product.category}`)} className="capitalize hover:text-[#7B1E3B] transition-colors">
+            {product.category}
+          </button>
           <ChevronRight size={14} />
-          <span className="text-neutral-900 font-medium truncate">{product.name}</span>
+          <span className="text-neutral-900 font-semibold truncate">{product.name}</span>
         </nav>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Image Section with Zoom */}
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          
+          {/* Left Column: Image Gallery (7 cols on LG) */}
+          <div className="lg:col-span-7 space-y-4">
             <div
-              className="relative aspect-square bg-neutral-50 rounded-xl overflow-hidden border border-neutral-200 cursor-zoom-in"
+              className="relative aspect-square bg-neutral-50 rounded-2xl overflow-hidden border border-neutral-200/80 shadow-sm cursor-zoom-in group"
               onClick={() => setLightboxOpen(true)}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
@@ -179,33 +182,43 @@ function ProductDetailPage() {
                   src={getImageUrl(product.images[activeImage])}
                   alt={product.name}
                   fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  sizes="(max-width: 1024px) 100vw, 55vw"
                   className="object-cover transition-transform duration-300"
                   style={zoomStyle}
                   priority
                 />
               ) : (
-                <div className="flex items-center justify-center h-full">
-                  <span className="text-6xl font-bold text-neutral-200">{product.name?.charAt(0) || 'R'}</span>
+                <div className="flex items-center justify-center h-full bg-neutral-100">
+                  <span className="text-7xl font-bold text-neutral-300 font-display">{product.name?.charAt(0) || 'S'}</span>
                 </div>
               )}
 
-              <div className="absolute top-4 right-4 flex gap-2">
+              {/* Badges */}
+              <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
                 {discount > 0 && (
-                  <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-md">
-                    -{discount}%
+                  <span className="bg-[#7B1E3B] text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md tracking-wider">
+                    -{discount}% OFF
                   </span>
                 )}
+                <span className="bg-amber-800 text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg backdrop-blur-md shadow-sm">
+                  100% Genuine Leather
+                </span>
+              </div>
+
+              {/* Action Floating Buttons */}
+              <div className="absolute top-4 right-4 flex gap-2 z-10">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsWishlisted(!isWishlisted);
+                    toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist!');
                   }}
-                  className="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm hover:bg-white transition-colors"
+                  className="p-2.5 bg-white/90 backdrop-blur-md rounded-xl shadow-md hover:bg-white transition-all active:scale-95"
+                  title="Wishlist"
                 >
                   <Heart
-                    size={18}
-                    className={isWishlisted ? 'fill-red-500 text-red-500' : 'text-neutral-400'}
+                    size={20}
+                    className={isWishlisted ? 'fill-[#7B1E3B] text-[#7B1E3B]' : 'text-neutral-500'}
                   />
                 </button>
                 <button
@@ -213,22 +226,26 @@ function ProductDetailPage() {
                     e.stopPropagation();
                     setLightboxOpen(true);
                   }}
-                  className="p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm hover:bg-white transition-colors"
+                  className="p-2.5 bg-white/90 backdrop-blur-md rounded-xl shadow-md hover:bg-white transition-all active:scale-95"
+                  title="Full Screen View"
                 >
-                  <ZoomIn size={18} className="text-neutral-400" />
+                  <ZoomIn size={20} className="text-neutral-600" />
                 </button>
               </div>
             </div>
 
-            {/* Thumbnail Gallery */}
+            {/* Gallery Thumbnails */}
             {product.images && product.images.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto pb-2">
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
                 {product.images.map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveImage(idx)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors relative ${activeImage === idx
-                      ? 'border-neutral-900' : 'border-neutral-200 hover:border-neutral-400'}`}
+                    className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all relative ${
+                      activeImage === idx
+                        ? 'border-[#7B1E3B] ring-2 ring-[#7B1E3B]/20 scale-105'
+                        : 'border-neutral-200 hover:border-neutral-400 opacity-70 hover:opacity-100'
+                    }`}
                   >
                     <Image
                       src={getImageUrl(img)}
@@ -243,72 +260,96 @@ function ProductDetailPage() {
             )}
           </div>
 
-          {/* Sticky Details Section */}
-          <div className="lg:sticky lg:top-24 space-y-6 self-start">
-            <div className="text-sm text-neutral-500">
-              SKU: {product.sku || 'N/A'}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-md capitalize">
-                {product.category}
-              </span>
-              {product.featured && (
-                <span className="px-3 py-1 bg-neutral-900 text-white text-xs font-medium rounded-md">
-                  Featured
+          {/* Right Column: Product Info & Buy Controls (5 cols on LG) */}
+          <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-6">
+            
+            {/* Header info */}
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-xs font-bold tracking-widest text-[#7B1E3B] uppercase bg-[#7B1E3B]/10 px-3 py-1 rounded-full">
+                  {product.category || 'Leather Goods'}
                 </span>
-              )}
-            </div>
-
-            <h1 className="text-3xl lg:text-4xl font-bold text-neutral-900">
-              {product.name}
-            </h1>
-
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-neutral-500">Premium Quality Product</span>
-            </div>
-
-            <div className="flex items-end gap-3">
-              <span className="text-3xl font-bold text-neutral-900">
-                {formatBDT(product.price)}
-              </span>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <>
-                  <span className="text-base text-neutral-400 line-through">
-                    {formatBDT(product.originalPrice)}
+                {product.sku && (
+                  <span className="text-xs font-mono font-medium text-neutral-400 bg-neutral-100 px-2.5 py-1 rounded-md">
+                    SKU: {product.sku}
                   </span>
-                  <span className="text-xs font-semibold text-red-500 bg-red-50 px-2 py-0.5 rounded">
-                    Save {formatBDT(product.originalPrice - product.price)}
-                  </span>
-                </>
-              )}
+                )}
+              </div>
+
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight mb-2">
+                {product.name}
+              </h1>
+
+              {/* Rating Review Summary */}
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center text-amber-500">
+                  <Star size={16} className="fill-amber-400 text-amber-400" />
+                  <Star size={16} className="fill-amber-400 text-amber-400" />
+                  <Star size={16} className="fill-amber-400 text-amber-400" />
+                  <Star size={16} className="fill-amber-400 text-amber-400" />
+                  <Star size={16} className="fill-amber-400 text-amber-400" />
+                </div>
+                <span className="text-sm font-bold text-neutral-800">4.9</span>
+                <span className="text-xs text-neutral-400">(32 Customer Reviews)</span>
+              </div>
+
+              {/* Price & Savings */}
+              <div className="flex items-baseline gap-3 p-4 bg-neutral-50 rounded-2xl border border-neutral-100">
+                <span className="text-3xl font-extrabold text-[#7B1E3B]">
+                  {formatBDT(product.price)}
+                </span>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <>
+                    <span className="text-lg text-neutral-400 line-through">
+                      {formatBDT(product.originalPrice)}
+                    </span>
+                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                      Save {formatBDT(product.originalPrice - product.price)}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
 
-            <div className="pt-4 border-t border-neutral-100">
-              {/* Physical Dimensions */}
+            {/* Options Selection (Sizes & Colors) */}
+            <div className="space-y-4 pt-2 border-t border-neutral-100">
+              
+              {/* Dimensions Info Box */}
               {product.dimensions && (product.dimensions.height || product.dimensions.width) && (
-                <div className="text-sm text-neutral-600 mb-5 bg-neutral-50 p-3 rounded-lg border border-neutral-200">
-                  <span className="font-semibold text-neutral-900">Dimensions (H × W × D):</span>{' '}
-                  <span className="font-mono text-neutral-800 font-medium">
+                <div className="p-3.5 bg-amber-50/50 rounded-xl border border-amber-200/60">
+                  <div className="flex items-center gap-2 text-xs font-bold text-amber-900 mb-0.5">
+                    📐 Bag / Product Dimensions
+                  </div>
+                  <p className="text-sm font-mono font-bold text-neutral-800">
                     {[product.dimensions.height, product.dimensions.width, product.dimensions.depth].filter(Boolean).join(' × ')} {product.dimensions.unit || 'in'}
-                  </span>
+                  </p>
+                  <p className="text-[11px] text-neutral-500 mt-0.5">(Height × Width × Depth)</p>
                 </div>
               )}
 
               {/* Size Selector */}
               {product.sizes && product.sizes.length > 0 && (
-                <div className="mb-5">
-                  <span className="block text-sm font-medium text-neutral-800 mb-3">
-                    Size: <span className="font-bold text-neutral-900">{product.sizes[selectedSize]}</span>
-                  </span>
+                <div>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="text-sm font-bold text-neutral-800">
+                      Select Size: <span className="text-[#7B1E3B] font-extrabold">{product.sizes[selectedSize]}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toast('Standard sizing guide: Bags (Small/Medium/Large), Belts (32"-42")', { icon: '📏' })}
+                      className="text-xs text-[#7B1E3B] font-semibold hover:underline flex items-center gap-1"
+                    >
+                      Size Guide
+                    </button>
+                  </div>
                   <div className="flex flex-wrap gap-2.5">
                     {product.sizes.map((size, idx) => (
                       <button
                         key={idx}
                         onClick={() => setSelectedSize(idx)}
-                        className={`px-4 py-2 rounded-md text-sm font-semibold border transition-all ${
+                        className={`px-4 py-2.5 rounded-xl text-sm font-bold border transition-all ${
                           selectedSize === idx
-                            ? 'border-neutral-900 bg-neutral-900 text-white shadow-sm'
+                            ? 'border-[#7B1E3B] bg-[#7B1E3B] text-white shadow-md shadow-[#7B1E3B]/20 scale-105'
                             : 'border-neutral-200 text-neutral-700 hover:border-neutral-400 bg-white'
                         }`}
                       >
@@ -321,11 +362,11 @@ function ProductDetailPage() {
 
               {/* Color Selector */}
               {product.colors && product.colors.length > 0 && (
-                <div className="mb-5">
-                  <span className="block text-sm font-medium text-neutral-800 mb-3">
-                    Color: {typeof product.colors[selectedColor] === 'object' ? product.colors[selectedColor].name : product.colors[selectedColor]}
+                <div>
+                  <span className="block text-sm font-bold text-neutral-800 mb-2.5">
+                    Color: <span className="text-neutral-900 font-semibold">{typeof product.colors[selectedColor] === 'object' ? product.colors[selectedColor].name : product.colors[selectedColor]}</span>
                   </span>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2.5">
                     {product.colors.map((color, idx) => {
                       const colorName = typeof color === 'object' ? color.name : color;
                       const colorHex = typeof color === 'object' ? color.hex : null;
@@ -333,12 +374,15 @@ function ProductDetailPage() {
                         <button
                           key={idx}
                           onClick={() => setSelectedColor(idx)}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium border transition-colors ${selectedColor === idx
-                            ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-600 hover:border-neutral-400'}`}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+                            selectedColor === idx
+                              ? 'border-[#7B1E3B] bg-[#7B1E3B] text-white shadow-md shadow-[#7B1E3B]/20'
+                              : 'border-neutral-200 text-neutral-700 hover:border-neutral-400 bg-white'
+                          }`}
                         >
                           {colorHex && (
                             <span
-                              className={`w-3 h-3 rounded-full border ${selectedColor === idx ? 'border-white/50' : 'border-neutral-300'}`}
+                              className={`w-3.5 h-3.5 rounded-full border ${selectedColor === idx ? 'border-white/50' : 'border-neutral-300'}`}
                               style={{ backgroundColor: colorHex }}
                             />
                           )}
@@ -350,176 +394,217 @@ function ProductDetailPage() {
                 </div>
               )}
 
-              <div className="flex items-center gap-2 mb-4">
+              {/* Stock Status */}
+              <div className="flex items-center gap-2 pt-1">
                 {product.stock > 0 ? (
                   <>
-                    <Check size={16} className="text-green-600" />
-                    <span className="text-sm text-green-600 font-medium">In Stock</span>
+                    <Check size={16} className="text-emerald-600 font-bold" />
+                    <span className="text-sm text-emerald-700 font-semibold">In Stock & Ready to Ship</span>
                     {product.stock <= 5 && (
-                      <span className="text-xs text-amber-600 font-medium">
-                        (Only {product.stock} left!)
+                      <span className="text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-bold">
+                        Only {product.stock} left!
                       </span>
                     )}
                   </>
                 ) : (
-                  <span className="text-sm text-red-500 font-medium">Out of Stock</span>
+                  <span className="text-sm text-red-500 font-bold">Currently Out of Stock</span>
                 )}
               </div>
 
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center border border-neutral-200 rounded-lg">
+              {/* Quantity & Buy Buttons */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center border border-neutral-200 rounded-xl bg-white p-1">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="p-2.5 hover:bg-neutral-100 transition-colors rounded-lg text-neutral-700"
+                    >
+                      <Minus size={16} />
+                    </button>
+                    <span className="px-4 py-2 text-center min-w-[44px] font-bold text-sm text-neutral-900">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => setQuantity(Math.min(product.stock || 99, quantity + 1))}
+                      className="p-2.5 hover:bg-neutral-100 transition-colors rounded-lg text-neutral-700"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+
                   <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-3 hover:bg-neutral-50 transition-colors rounded-l-lg"
+                    onClick={handleAddToCart}
+                    disabled={product.stock === 0}
+                    className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 bg-neutral-900 hover:bg-neutral-800 text-white font-bold rounded-xl transition-all shadow-md active:scale-[0.98] disabled:bg-neutral-300 text-sm"
                   >
-                    <Minus size={16} />
-                  </button>
-                  <span className="px-4 py-2 text-center min-w-[48px] font-medium text-sm">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => setQuantity(Math.min(product.stock || 99, quantity + 1))}
-                    className="p-3 hover:bg-neutral-50 transition-colors rounded-r-lg"
-                  >
-                    <Plus size={16} />
+                    <ShoppingCart size={18} />
+                    Add to Cart
                   </button>
                 </div>
-
-                <button
-                  onClick={handleAddToCart}
-                  disabled={product.stock === 0}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-neutral-100 hover:bg-neutral-200 disabled:bg-neutral-100 disabled:cursor-not-allowed text-neutral-900 font-semibold rounded-lg transition-colors text-sm"
-                >
-                  <ShoppingCart size={18} />
-                  Add to Cart
-                </button>
 
                 <button
                   onClick={handleBuyNow}
                   disabled={product.stock === 0}
-                  className="flex-1 px-6 py-3 bg-neutral-900 hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors text-sm"
+                  className="w-full py-3.5 bg-[#7B1E3B] hover:bg-[#651828] text-white font-bold rounded-xl transition-all shadow-lg shadow-[#7B1E3B]/25 active:scale-[0.98] disabled:bg-neutral-300 text-sm"
                 >
-                  Buy Now
+                  Buy Now — Fast Checkout
                 </button>
               </div>
 
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  toast.success('Link copied!');
-                }}
-                className="flex items-center gap-2 text-sm text-neutral-400 hover:text-neutral-900 transition-colors"
-              >
-                <Share2 size={14} />
-                Share this product
-              </button>
+              {/* Share button */}
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success('Link copied to clipboard!');
+                  }}
+                  className="flex items-center gap-2 text-xs font-medium text-neutral-500 hover:text-[#7B1E3B] transition-colors"
+                >
+                  <Share2 size={14} />
+                  Share this product
+                </button>
+                <span className="text-xs text-neutral-400">⚡ Fast Shipping Nationwide</span>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-neutral-200">
-              <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-lg">
-                <Shield size={18} className="text-neutral-400" />
-                <div>
-                  <p className="text-xs font-medium text-neutral-800">2-Year Warranty</p>
-                  <p className="text-xs text-neutral-400">Quality guaranteed</p>
-                </div>
+            {/* Trust Features Cards */}
+            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-neutral-100">
+              <div className="p-3 bg-neutral-50 rounded-xl text-center border border-neutral-100">
+                <Shield size={18} className="text-[#7B1E3B] mx-auto mb-1" />
+                <p className="text-xs font-bold text-neutral-800">2-Year Warranty</p>
+                <p className="text-[10px] text-neutral-400 mt-0.5">Leather Guarantee</p>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-lg">
-                <RotateCcw size={18} className="text-neutral-400" />
-                <div>
-                  <p className="text-xs font-medium text-neutral-800">Easy Returns</p>
-                  <p className="text-xs text-neutral-400">30-day return policy</p>
-                </div>
+              <div className="p-3 bg-neutral-50 rounded-xl text-center border border-neutral-100">
+                <RotateCcw size={18} className="text-[#7B1E3B] mx-auto mb-1" />
+                <p className="text-xs font-bold text-neutral-800">Easy Returns</p>
+                <p className="text-[10px] text-neutral-400 mt-0.5">30 Days Return</p>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-lg">
-                <Truck size={18} className="text-neutral-400" />
-                <div>
-                  <p className="text-xs font-medium text-neutral-800">Standard Delivery</p>
-                  <p className="text-xs text-neutral-400">Available nationwide</p>
-                </div>
+              <div className="p-3 bg-neutral-50 rounded-xl text-center border border-neutral-100">
+                <Truck size={18} className="text-[#7B1E3B] mx-auto mb-1" />
+                <p className="text-xs font-bold text-neutral-800">Fast Delivery</p>
+                <p className="text-[10px] text-neutral-400 mt-0.5">All Over BD 🇧🇩</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Tabbed Content Section */}
-        <div className="mt-12 pt-8 border-t border-neutral-200">
-          <div className="flex border-b border-neutral-200 mb-6">
-              <button
-                onClick={() => setActiveTab('description')}
-                className={`py-3 px-6 font-medium text-sm ${activeTab === 'description' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-500 hover:text-neutral-800'}`}
-              >
-                <div className="flex items-center gap-2">
-                  <FileText size={16} />
-                  Description
-                </div>
-              </button>
-              <button
-                onClick={() => setActiveTab('specs')}
-                className={`py-3 px-6 font-medium text-sm ${activeTab === 'specs' ? 'text-neutral-900 border-b-2 border-neutral-900' : 'text-neutral-500 hover:text-neutral-800'}`}
-              >
-                <div className="flex items-center gap-2">
-                  <Info size={16} />
-                  Specifications
-                </div>
-              </button>
+        {/* Tabbed Detail Section */}
+        <div className="mt-16 pt-8 border-t border-neutral-200">
+          <div className="flex border-b border-neutral-200 gap-2 overflow-x-auto">
+            <button
+              onClick={() => setActiveTab('description')}
+              className={`py-3 px-6 font-bold text-sm transition-all border-b-2 ${
+                activeTab === 'description'
+                  ? 'text-[#7B1E3B] border-[#7B1E3B]'
+                  : 'text-neutral-500 border-transparent hover:text-neutral-800'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <FileText size={16} />
+                Description
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('specs')}
+              className={`py-3 px-6 font-bold text-sm transition-all border-b-2 ${
+                activeTab === 'specs'
+                  ? 'text-[#7B1E3B] border-[#7B1E3B]'
+                  : 'text-neutral-500 border-transparent hover:text-neutral-800'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Info size={16} />
+                Specifications
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('care')}
+              className={`py-3 px-6 font-bold text-sm transition-all border-b-2 ${
+                activeTab === 'care'
+                  ? 'text-[#7B1E3B] border-[#7B1E3B]'
+                  : 'text-neutral-500 border-transparent hover:text-neutral-800'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Shield size={16} />
+                Leather Care
+              </div>
+            </button>
           </div>
 
-          <div className="prose prose-neutral max-w-none">
+          {/* Tab Contents */}
+          <div className="py-6">
             {activeTab === 'description' && (
-              <div>
-                <h3 className="font-bold text-lg mb-4">Product Description</h3>
-                <p className="text-neutral-600 mb-4">
-                  {product.description || product.shortDescription || 'No description available.'}
+              <div className="max-w-3xl space-y-4">
+                <h3 className="font-bold text-lg text-neutral-900">Craftsmanship & Design</h3>
+                <p className="text-neutral-600 leading-relaxed text-sm">
+                  {product.description || product.shortDescription || 'Every SAVANT piece is handcrafted by master artisans using full-grain leather, ensuring unmatched durability and timeless elegance.'}
                 </p>
                 {product.material && (
-                  <div className="mb-4">
-                    <strong>Material:</strong> {product.material}
-                  </div>
-                )}
-                {product.dimensions && (
-                  <div>
-                    <strong>Dimensions:</strong> {product.dimensions}
+                  <div className="p-4 bg-neutral-50 rounded-xl border border-neutral-200/80 text-sm">
+                    <strong className="text-neutral-900">Material & Construction:</strong> {product.material}
                   </div>
                 )}
               </div>
             )}
 
             {activeTab === 'specs' && (
-              <div>
-                <h3 className="font-bold text-lg mb-4">Specifications</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <div className="flex justify-between py-2 border-b border-neutral-100">
-                      <span className="text-neutral-600">SKU</span>
-                      <span>{product.sku || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-neutral-100">
-                      <span className="text-neutral-600">Material</span>
-                      <span>{product.material || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-neutral-100">
-                      <span className="text-neutral-600">Weight</span>
-                      <span>{product.weight || 'N/A'}</span>
-                    </div>
+              <div className="max-w-3xl">
+                <h3 className="font-bold text-lg text-neutral-900 mb-4">Product Specifications</h3>
+                <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden divide-y divide-neutral-100 text-sm">
+                  <div className="flex justify-between p-3.5 bg-neutral-50">
+                    <span className="text-neutral-500 font-medium">SKU</span>
+                    <span className="font-mono font-bold text-neutral-900">{product.sku || 'N/A'}</span>
                   </div>
-                  <div>
-                    <div className="flex justify-between py-2 border-b border-neutral-100">
-                      <span className="text-neutral-600">Dimensions</span>
-                      <span>{product.dimensions || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-neutral-100">
-                      <span className="text-neutral-600">Warranty</span>
-                      <span>2 years</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-neutral-100">
-                      <span className="text-neutral-600">Country of Origin</span>
-                      <span>Italy</span>
-                    </div>
+                  <div className="flex justify-between p-3.5">
+                    <span className="text-neutral-500 font-medium">Material</span>
+                    <span className="font-semibold text-neutral-900">{product.material || 'Full Grain Premium Leather'}</span>
+                  </div>
+                  <div className="flex justify-between p-3.5 bg-neutral-50">
+                    <span className="text-neutral-500 font-medium">Dimensions</span>
+                    <span className="font-mono font-semibold text-neutral-900">
+                      {product.dimensions && (product.dimensions.height || product.dimensions.width)
+                        ? `${[product.dimensions.height, product.dimensions.width, product.dimensions.depth].filter(Boolean).join(' × ')} ${product.dimensions.unit || 'in'}`
+                        : 'Standard Size'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between p-3.5">
+                    <span className="text-neutral-500 font-medium">Available Sizes</span>
+                    <span className="font-semibold text-neutral-900">{product.sizes?.join(', ') || 'Standard'}</span>
+                  </div>
+                  <div className="flex justify-between p-3.5 bg-neutral-50">
+                    <span className="text-neutral-500 font-medium">Warranty</span>
+                    <span className="font-semibold text-neutral-900">2-Year Full Leather Warranty</span>
+                  </div>
+                  <div className="flex justify-between p-3.5">
+                    <span className="text-neutral-500 font-medium">Origin</span>
+                    <span className="font-semibold text-neutral-900">Handcrafted in Bangladesh 🇧🇩</span>
                   </div>
                 </div>
               </div>
             )}
-            {/* Force new commit for Vercel deployment */}
+
+            {activeTab === 'care' && (
+              <div className="max-w-3xl space-y-4">
+                <h3 className="font-bold text-lg text-neutral-900">Leather Care & Maintenance</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div className="p-4 bg-neutral-50 rounded-xl border border-neutral-100">
+                    <h4 className="font-bold text-[#7B1E3B] mb-1">🧼 Cleaning</h4>
+                    <p className="text-neutral-600 text-xs leading-relaxed">
+                      Wipe gently with a soft dry cloth. For stains, use a damp cloth with leather cleaner. Avoid water soaking.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-neutral-50 rounded-xl border border-neutral-100">
+                    <h4 className="font-bold text-[#7B1E3B] mb-1">✨ Conditioning</h4>
+                    <p className="text-neutral-600 text-xs leading-relaxed">
+                      Apply quality leather conditioner every 3-6 months to preserve softness, prevent cracks, and enrich patina.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
