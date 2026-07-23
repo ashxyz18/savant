@@ -59,9 +59,9 @@ const Hero = () => {
   };
 
   const features = [
-    { icon: <Shield className="w-4 h-4" />, text: '2-Year Warranty' },
-    { icon: <Truck className="w-4 h-4" />, text: 'Reliable Delivery' },
-    { icon: <RotateCcw className="w-4 h-4" />, text: '30-Day Returns' },
+    { icon: <Shield className="w-4 h-4" />, text: 'Warranty Guaranteed' },
+    { icon: <Truck className="w-4 h-4" />, text: 'Dhaka ৳80 | Outside ৳120' },
+    { icon: <RotateCcw className="w-4 h-4" />, text: '3-Day Returns' },
   ];
 
   const heroTitle = heroBanner?.title || 'Crafted for';
@@ -72,12 +72,12 @@ const Hero = () => {
     <section
       ref={heroRef}
       onMouseMove={handleMouseMove}
-      className="relative overflow-hidden bg-neutral-50 min-h-[100svh] sm:min-h-[85vh]"
+      className="relative overflow-hidden bg-neutral-900 min-h-[100svh] sm:min-h-[85vh]"
     >
-      {/* Full-bleed background video */}
-      <div className="absolute inset-0 z-0 h-full w-full">
+      {/* Background video (object-contain on mobile to prevent cropping, object-cover on sm+) */}
+      <div className="absolute inset-0 z-0 h-full w-full bg-[#2C0A14] flex items-center justify-center">
         <video
-          className="h-full w-full object-cover object-center"
+          className="h-full w-full object-contain sm:object-cover object-center"
           src="/hero-video.mp4"
           autoPlay
           muted
