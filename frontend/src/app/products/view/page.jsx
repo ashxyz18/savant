@@ -195,16 +195,13 @@ function ProductDetailPage() {
               )}
 
               {/* Badges */}
-              <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
-                {discount > 0 && (
+              {discount > 0 && (
+                <div className="absolute top-4 left-4 z-10">
                   <span className="bg-[#7B1E3B] text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md tracking-wider">
                     -{discount}% OFF
                   </span>
-                )}
-                <span className="bg-amber-800 text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg backdrop-blur-md shadow-sm">
-                  100% Genuine Leather
-                </span>
-              </div>
+                </div>
+              )}
 
               {/* Action Floating Buttons */}
               <div className="absolute top-4 right-4 flex gap-2 z-10">
@@ -277,22 +274,9 @@ function ProductDetailPage() {
                 )}
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight mb-2">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight mb-4">
                 {product.name}
               </h1>
-
-              {/* Rating Review Summary */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex items-center text-amber-500">
-                  <Star size={16} className="fill-amber-400 text-amber-400" />
-                  <Star size={16} className="fill-amber-400 text-amber-400" />
-                  <Star size={16} className="fill-amber-400 text-amber-400" />
-                  <Star size={16} className="fill-amber-400 text-amber-400" />
-                  <Star size={16} className="fill-amber-400 text-amber-400" />
-                </div>
-                <span className="text-sm font-bold text-neutral-800">4.9</span>
-                <span className="text-xs text-neutral-400">(32 Customer Reviews)</span>
-              </div>
 
               {/* Price & Savings */}
               <div className="flex items-baseline gap-3 p-4 bg-neutral-50 rounded-2xl border border-neutral-100">

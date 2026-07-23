@@ -79,16 +79,16 @@ export default function SignupPage() {
 
           <div className="mt-10 grid grid-cols-3 gap-4 text-center">
             <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10">
-              <div className="text-2xl font-bold text-white">10K+</div>
-              <div className="text-xs text-white/70 mt-1">Customers</div>
+              <div className="text-xl font-bold text-white">Handcrafted</div>
+              <div className="text-xs text-white/70 mt-1">Artisan Quality</div>
             </div>
             <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10">
-              <div className="text-2xl font-bold text-white">100%</div>
-              <div className="text-xs text-white/70 mt-1">Genuine</div>
+              <div className="text-xl font-bold text-white">Nationwide</div>
+              <div className="text-xs text-white/70 mt-1">Fast Shipping</div>
             </div>
             <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10">
-              <div className="text-2xl font-bold text-white">4.9★</div>
-              <div className="text-xs text-white/70 mt-1">Rating</div>
+              <div className="text-xl font-bold text-white">2 Years</div>
+              <div className="text-xs text-white/70 mt-1">Warranty</div>
             </div>
           </div>
         </div>
