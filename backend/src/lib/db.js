@@ -164,6 +164,10 @@ class MQuery {
     return this;
   }
 
+  lean() {
+    return this;
+  }
+
   populate(path, fields) {
     this._populate = {
       path,

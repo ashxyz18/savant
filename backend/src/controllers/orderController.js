@@ -21,7 +21,7 @@ async function populateOrderItems(orderList) {
   }
 
   const products = productIds.size > 0 
-    ? await Product.find({ _id: { $in: Array.from(productIds) } }).lean()
+    ? await Product.find({ _id: { $in: Array.from(productIds) } })
     : [];
 
   const productMap = {};
