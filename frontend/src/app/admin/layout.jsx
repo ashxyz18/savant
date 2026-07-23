@@ -18,6 +18,8 @@ import {
   ChevronRight,
   Bell,
   Settings,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
@@ -39,6 +41,21 @@ export default function AdminLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [theme, setTheme] = useState('light'); // default light / white mode
+
+  useEffect(() => {
+    const saved = localStorage.getItem('adminTheme');
+    if (saved) {
+      setTheme(saved);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    localStorage.setItem('adminTheme', next);
+    toast.success(`Switched to ${next === 'light' ? 'Light (White)' : 'Dark (Black)'} Mode`, { icon: next === 'light' ? '☀️' : '🌙' });
+  };
 
   const isLoginPage = pathname === '/admin/login';
 
@@ -71,7 +88,7 @@ export default function AdminLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex">
+    <div className={`min-h-screen flex ${theme === 'light' ? 'admin-light-mode bg-slate-50 text-slate-900' : 'bg-neutral-950 text-white'}`}>
       <Toaster position="top-right" />
 
       {/* Mobile overlay */}
@@ -136,7 +153,7 @@ export default function AdminLayout({ children }) {
           {/* User section */}
           <div className="p-4 border-t border-neutral-800">
             <div className="flex items-center gap-3 px-4 py-3 mb-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#7B1E3B] to-[#501224] rounded-full flex items-center justify-center text-white font-bold">
                 {user?.name?.charAt(0) || 'A'}
               </div>
               <div className="flex-1 min-w-0">
@@ -184,6 +201,25 @@ export default function AdminLayout({ children }) {
                 <span>Live Store</span>
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               </a>
+
+              {/* Theme Toggle Button (Light / White vs Dark / Black) */}
+              <button
+                onClick={toggleTheme}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 transition-all active:scale-95"
+                title="Switch Light/Dark Mode"
+              >
+                {theme === 'light' ? (
+                  <>
+                    <Sun className="w-4 h-4 text-amber-400" />
+                    <span>White Mode</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-4 h-4 text-indigo-400" />
+                    <span>Black Mode</span>
+                  </>
+                )}
+              </button>
 
               <button
                 onClick={() => toast('System Notifications: All systems running smoothly', { icon: '🔔' })}

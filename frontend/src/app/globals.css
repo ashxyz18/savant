@@ -221,3 +221,56 @@
     @apply bg-gradient-to-r from-primary-800 to-primary-600 bg-clip-text text-transparent;
   }
 }
+
+/* Admin Panel Light Mode Theme Overrides */
+.admin-light-mode {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+.admin-light-mode aside {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+}
+.admin-light-mode header {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #E2E8F0 !important;
+}
+.admin-light-mode header h1,
+.admin-light-mode aside span {
+  color: #0F172A !important;
+}
+.admin-light-mode .bg-neutral-900 {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+}
+.admin-light-mode .bg-neutral-950 {
+  background-color: #F8FAFC !important;
+}
+.admin-light-mode .bg-neutral-800,
+.admin-light-mode .bg-neutral-800\/50 {
+  background-color: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
+}
+.admin-light-mode .text-white {
+  color: #0F172A !important;
+}
+.admin-light-mode .text-neutral-400,
+.admin-light-mode .text-neutral-500 {
+  color: #64748B !important;
+}
+.admin-light-mode .border-neutral-800,
+.admin-light-mode .border-neutral-700 {
+  border-color: #E2E8F0 !important;
+}
+.admin-light-mode table {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+}
+.admin-light-mode input,
+.admin-light-mode select,
+.admin-light-mode textarea {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
