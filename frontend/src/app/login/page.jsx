@@ -145,13 +145,13 @@ export default function LoginPage() {
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">Email</label>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">Email Address</label>
                   <input
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     placeholder="you@example.com"
-                    className="w-full px-4 py-3 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:border-[#7B1E3B] transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:border-[#7B1E3B] focus:ring-2 focus:ring-[#7B1E3B]/10 transition-all"
                     required
                   />
                 </div>
@@ -163,20 +163,20 @@ export default function LoginPage() {
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                     placeholder="Enter your password"
-                    className="w-full px-4 py-3 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:border-[#7B1E3B] transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:border-[#7B1E3B] focus:ring-2 focus:ring-[#7B1E3B]/10 transition-all"
                     required
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-sm text-neutral-600">
-                    <input type="checkbox" className="rounded border-neutral-300" />
+                  <label className="flex items-center gap-2 text-sm text-neutral-600 cursor-pointer">
+                    <input type="checkbox" className="rounded border-neutral-300 text-[#7B1E3B] focus:ring-[#7B1E3B]" />
                     Remember me
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowForgot(true)}
-                    className="text-sm text-neutral-500 hover:text-[#7B1E3B] transition-colors"
+                    className="text-sm font-medium text-neutral-500 hover:text-[#7B1E3B] transition-colors"
                   >
                     Forgot password?
                   </button>
@@ -185,9 +185,9 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-[#7B1E3B] text-white rounded-lg font-semibold text-sm hover:bg-[#651828] disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors"
+                  className="w-full py-3.5 bg-[#7B1E3B] text-white rounded-xl font-semibold text-sm hover:bg-[#651828] disabled:bg-neutral-300 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-[#7B1E3B]/25 active:scale-[0.98]"
                 >
-                  {loading ? 'Signing in...' : 'Sign in'}
+                  {loading ? 'Signing in...' : 'Sign In'}
                 </button>
 
                 <div className="relative my-6">

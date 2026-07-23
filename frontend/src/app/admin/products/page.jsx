@@ -45,6 +45,11 @@ export default function AdminProductsPage() {
     featured: false,
     isActive: true,
     tags: '',
+    sizes: '',
+    dimensionHeight: '',
+    dimensionWidth: '',
+    dimensionDepth: '',
+    dimensionUnit: 'inches',
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
@@ -86,6 +91,11 @@ export default function AdminProductsPage() {
       featured: false,
       isActive: true,
       tags: '',
+      sizes: '',
+      dimensionHeight: '',
+      dimensionWidth: '',
+      dimensionDepth: '',
+      dimensionUnit: 'inches',
     });
     setImageFiles([]);
     setExistingImages([]);
@@ -115,6 +125,11 @@ export default function AdminProductsPage() {
       featured: product.featured || false,
       isActive: product.isActive,
       tags: product.tags?.join(', ') || '',
+      sizes: (product.sizes || []).join(', '),
+      dimensionHeight: product.dimensions?.height || '',
+      dimensionWidth: product.dimensions?.width || '',
+      dimensionDepth: product.dimensions?.depth || '',
+      dimensionUnit: product.dimensions?.unit || 'inches',
     });
     setExistingImages(product.images || []);
     setImagePreviews((product.images || []).map(img => img.startsWith('http') ? img : `${UPLOAD_URL}${img}`));
@@ -159,6 +174,15 @@ export default function AdminProductsPage() {
       formData.append('featured', form.featured);
       formData.append('isActive', form.isActive);
       formData.append('tags', form.tags);
+      if (form.sizes) formData.append('sizes', form.sizes);
+      const dimensions = {};
+      if (form.dimensionHeight) dimensions.height = form.dimensionHeight;
+      if (form.dimensionWidth) dimensions.width = form.dimensionWidth;
+      if (form.dimensionDepth) dimensions.depth = form.dimensionDepth;
+      if (Object.keys(dimensions).length > 0) {
+        dimensions.unit = form.dimensionUnit;
+        formData.append('dimensions', JSON.stringify(dimensions));
+      }
       formData.append('existingImages', JSON.stringify(existingImages));
       imageFiles.forEach(f => formData.append('images', f));
 
@@ -360,6 +384,7 @@ export default function AdminProductsPage() {
                 <th className="text-left px-6 py-4 text-sm font-medium text-neutral-400">SKU</th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-neutral-400">Category</th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-neutral-400">Price</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-neutral-400">Sizes</th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-neutral-400">Stock</th>
                 <th className="text-left px-6 py-4 text-sm font-medium text-neutral-400">Status</th>
                 <th className="text-right px-6 py-4 text-sm font-medium text-neutral-400">Actions</th>
@@ -368,7 +393,7 @@ export default function AdminProductsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center">
+                  <td colSpan={8} className="px-6 py-12 text-center">
                     <div className="flex justify-center">
                       <div className="w-8 h-8 border-2 border-primary-500/30 border-t-primary-500 rounded-full animate-spin" />
                     </div>
@@ -376,7 +401,7 @@ export default function AdminProductsPage() {
                 </tr>
               ) : products.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-neutral-500">
+                  <td colSpan={8} className="px-6 py-12 text-center text-neutral-500">
                     <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
                     <p>No products found</p>
                   </td>
@@ -400,7 +425,7 @@ export default function AdminProductsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-neutral-300 font-mono text-sm">{product.sku || 'â€”'}</span>
+                      <span className="text-neutral-300 font-mono text-sm">{product.sku || '—'}</span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1">
@@ -417,6 +442,29 @@ export default function AdminProductsPage() {
                         <p className="text-white font-medium">৳{product.price}</p>
                         {product.originalPrice && (
                           <p className="text-neutral-500 text-sm line-through">৳{product.originalPrice}</p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        {product.sizes && product.sizes.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {product.sizes.slice(0, 4).map((size, i) => (
+                              <span key={i} className="inline-flex px-2 py-0.5 rounded-md text-xs font-medium bg-neutral-800 text-neutral-300 border border-neutral-700">
+                                {size}
+                              </span>
+                            ))}
+                            {product.sizes.length > 4 && (
+                              <span className="text-xs text-neutral-500">+{product.sizes.length - 4}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-neutral-600 text-sm">—</span>
+                        )}
+                        {product.dimensions && (product.dimensions.height || product.dimensions.width) && (
+                          <span className="text-xs text-neutral-500">
+                            {[product.dimensions.height, product.dimensions.width, product.dimensions.depth].filter(Boolean).join(' × ')} {product.dimensions.unit || 'in'}
+                          </span>
                         )}
                       </div>
                     </td>
@@ -648,6 +696,71 @@ export default function AdminProductsPage() {
                       placeholder="leather, bag, luxury"
                       className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
+                  </div>
+
+                  {/* Sizes */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-300 mb-2">
+                      Available Sizes
+                      <span className="text-neutral-500 font-normal ml-1">(comma separated)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={form.sizes}
+                      onChange={(e) => setForm(f => ({ ...f, sizes: e.target.value }))}
+                      placeholder='e.g. S, M, L, XL or 32&quot;, 34&quot;, 36&quot;, 38&quot;'
+                      className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-neutral-500 mt-1">For belts: 32&quot;, 34&quot;, 36&quot; · For bags: S, M, L</p>
+                  </div>
+
+                  {/* Dimensions */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-300 mb-2">
+                      📐 Product Dimensions
+                      <span className="text-neutral-500 font-normal ml-1">(H × W × D)</span>
+                    </label>
+                    <div className="grid grid-cols-4 gap-2">
+                      <div>
+                        <input
+                          type="text"
+                          value={form.dimensionHeight}
+                          onChange={(e) => setForm(f => ({ ...f, dimensionHeight: e.target.value }))}
+                          placeholder="Height"
+                          className="w-full px-3 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          value={form.dimensionWidth}
+                          onChange={(e) => setForm(f => ({ ...f, dimensionWidth: e.target.value }))}
+                          placeholder="Width"
+                          className="w-full px-3 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          value={form.dimensionDepth}
+                          onChange={(e) => setForm(f => ({ ...f, dimensionDepth: e.target.value }))}
+                          placeholder="Depth"
+                          className="w-full px-3 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                        />
+                      </div>
+                      <div>
+                        <select
+                          value={form.dimensionUnit}
+                          onChange={(e) => setForm(f => ({ ...f, dimensionUnit: e.target.value }))}
+                          className="w-full px-3 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                        >
+                          <option value="inches">in</option>
+                          <option value="cm">cm</option>
+                          <option value="mm">mm</option>
+                        </select>
+                      </div>
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-1">Bag: Height × Width × Depth · Tote: 14 × 16 × 6 inches</p>
                   </div>
 
                   <div className="flex flex-wrap gap-6">

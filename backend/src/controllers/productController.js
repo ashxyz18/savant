@@ -114,6 +114,14 @@ const coerceProductFields = (data) => {
   if (data.originalPrice !== undefined && data.originalPrice !== '') data.originalPrice = Number(data.originalPrice);
   if (data.stock !== undefined && data.stock !== '') data.stock = Number(data.stock);
   if (data.colorCount !== undefined && data.colorCount !== '') data.colorCount = Number(data.colorCount);
+  // Parse sizes (comma-separated string -> array)
+  if (typeof data.sizes === 'string') {
+    try { data.sizes = JSON.parse(data.sizes); } catch { data.sizes = data.sizes.split(',').map(s => s.trim()).filter(Boolean); }
+  }
+  // Parse dimensions JSON if sent as string
+  if (typeof data.dimensions === 'string') {
+    try { data.dimensions = JSON.parse(data.dimensions); } catch { data.dimensions = {}; }
+  }
   // New products default to active so they appear in the storefront.
   if (data.isActive === undefined) data.isActive = true;
   return data;
