@@ -509,14 +509,15 @@ export default function AccountPage() {
                <h3 className="text-sm font-bold text-gray-900 mb-3">Products in Order ({selectedOrder.items?.length || 0})</h3>
                <div className="space-y-3">
                  {selectedOrder.items?.map((item, idx) => {
-                   const img = item.image || item.images?.[0] || item.product?.images?.[0];
+                   const img = item.image || item.images?.[0] || item.productDetails?.images?.[0] || item.product?.images?.[0];
                    const imgUrl = img ? (img.startsWith('http') ? img : (process.env.NEXT_PUBLIC_API_URL || 'https://api.savant.com/api').replace('/api', '') + (img.startsWith('/') ? img : `/${img}`)) : null;
+                   const sku = item.sku || item.productDetails?.sku || item.product?.sku;
                    const size = item.selectedSize || item.size;
                    const color = item.selectedColor || item.color;
                    return (
                      <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
                        <div className="flex items-center gap-3">
-                         <div className="w-14 h-14 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+                         <div className="w-14 h-14 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-200">
                            {imgUrl ? (
                              <img src={imgUrl} alt={item.name} className="w-full h-full object-cover" />
                            ) : (
@@ -524,7 +525,14 @@ export default function AccountPage() {
                            )}
                          </div>
                          <div>
-                           <p className="text-sm font-semibold text-gray-900">{item.name || 'Product'}</p>
+                           <div className="flex items-center gap-2 flex-wrap">
+                             <p className="text-sm font-semibold text-gray-900">{item.name || 'Product'}</p>
+                             {sku && (
+                               <span className="px-1.5 py-0.5 rounded bg-primary-50 text-primary-700 border border-primary-200 text-xs font-mono font-medium">
+                                 SKU: {sku}
+                               </span>
+                             )}
+                           </div>
                            <div className="flex items-center gap-2 mt-1 flex-wrap">
                              <span className="text-xs text-gray-500 font-mono">Qty: {item.quantity}</span>
                              {size && (

@@ -224,18 +224,40 @@ export default function AdminOrdersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1 max-w-xs">
-                          {order.items?.map((item, idx) => (
-                            <div key={idx} className="flex items-center gap-2 text-xs text-neutral-300">
-                              <span className="font-semibold text-white truncate max-w-[140px]">{item.name || 'Product'}</span>
-                              <span className="text-neutral-400">×{item.quantity}</span>
-                              {(item.selectedSize || item.size) && (
-                                <span className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 border border-neutral-700 text-[10px]">
-                                  {item.selectedSize || item.size}
-                                </span>
-                              )}
-                            </div>
-                          ))}
+                        <div className="flex flex-col gap-2 max-w-xs">
+                          {order.items?.map((item, idx) => {
+                            const img = item.image || item.images?.[0] || item.productDetails?.images?.[0] || item.product?.images?.[0];
+                            const imgUrl = img ? (img.startsWith('http') ? img : (process.env.NEXT_PUBLIC_API_URL || 'https://api.savant.com/api').replace('/api', '') + (img.startsWith('/') ? img : `/${img}`)) : null;
+                            const sku = item.sku || item.productDetails?.sku || item.product?.sku;
+                            const size = item.selectedSize || item.size;
+                            return (
+                              <div key={idx} className="flex items-center gap-2.5">
+                                <div className="w-9 h-9 bg-neutral-800 border border-neutral-700 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                                  {imgUrl ? (
+                                    <img src={imgUrl} alt={item.name} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <span className="text-xs font-bold text-neutral-500">{item.name?.charAt(0) || 'P'}</span>
+                                  )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="font-semibold text-white text-xs truncate max-w-[130px]">{item.name || 'Product'}</span>
+                                    <span className="text-neutral-400 text-xs">×{item.quantity}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                                    {sku && (
+                                      <span className="text-[10px] font-mono text-primary-400 font-medium">SKU: {sku}</span>
+                                    )}
+                                    {size && (
+                                      <span className="px-1.5 py-0.2 rounded bg-neutral-800 text-neutral-400 border border-neutral-700 text-[10px]">
+                                        {size}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
                           <span className="text-[11px] text-neutral-500 font-medium mt-0.5">
                             {order.items?.length} item{order.items?.length !== 1 ? 's' : ''} total
                           </span>
@@ -389,8 +411,9 @@ export default function AdminOrdersPage() {
                 <h3 className="text-white font-semibold mb-3">Ordered Products ({selectedOrder.items?.length || 0})</h3>
                 <div className="space-y-3">
                   {selectedOrder.items?.map((item, i) => {
-                    const img = item.image || item.images?.[0] || item.product?.images?.[0];
+                    const img = item.image || item.images?.[0] || item.productDetails?.images?.[0] || item.product?.images?.[0];
                     const imgUrl = img ? (img.startsWith('http') ? img : (process.env.NEXT_PUBLIC_API_URL || 'https://api.savant.com/api').replace('/api', '') + (img.startsWith('/') ? img : `/${img}`)) : null;
+                    const sku = item.sku || item.productDetails?.sku || item.product?.sku;
                     const size = item.selectedSize || item.size;
                     const color = item.selectedColor || item.color;
                     return (
@@ -404,7 +427,14 @@ export default function AdminOrdersPage() {
                             )}
                           </div>
                           <div>
-                            <p className="text-white text-sm font-semibold">{item.name || 'Product'}</p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="text-white text-sm font-semibold">{item.name || 'Product'}</p>
+                              {sku && (
+                                <span className="px-2 py-0.5 rounded bg-primary-500/10 text-primary-400 border border-primary-500/20 text-xs font-mono font-medium">
+                                  SKU: {sku}
+                                </span>
+                              )}
+                            </div>
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
                               <span className="text-neutral-400 text-xs font-mono">Qty: {item.quantity}</span>
                               {size && (
