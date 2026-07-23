@@ -72,12 +72,12 @@ const Hero = () => {
     <section
       ref={heroRef}
       onMouseMove={handleMouseMove}
-      className="relative overflow-hidden bg-neutral-900 min-h-[100svh] sm:min-h-[85vh]"
+      className="relative overflow-hidden bg-primary-950 min-h-[55vh] sm:min-h-[85vh]"
     >
-      {/* Background video (object-contain on mobile to prevent cropping, object-cover on sm+) */}
-      <div className="absolute inset-0 z-0 h-full w-full bg-[#2C0A14] flex items-center justify-center">
+      {/* Background video - full bleed object-cover without letterbox gaps */}
+      <div className="absolute inset-0 z-0 h-full w-full bg-primary-950">
         <video
-          className="h-full w-full object-contain sm:object-cover object-center"
+          className="h-full w-full object-cover object-center"
           src="/hero-video.mp4"
           autoPlay
           muted
@@ -87,7 +87,7 @@ const Hero = () => {
       </div>
 
       {/* Maroon overlay for readability */}
-      <div className="absolute inset-0 z-10 bg-gradient-to-b from-primary-950/40 via-primary-900/35 to-primary-950/60" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-primary-950/60 via-primary-900/40 to-primary-950/80" />
 
       {/* Animated background decoration with parallax */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
@@ -108,8 +108,8 @@ const Hero = () => {
         />
       </div>
 
-      <div className="container relative z-20">
-        <div className="flex min-h-[100svh] sm:min-h-[85vh] flex-col items-start justify-end py-24 text-left">
+      <div className="container relative z-20 mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex min-h-[55vh] sm:min-h-[85vh] flex-col items-start justify-end py-8 sm:py-20 text-left">
           <div className={`max-w-3xl transition-all duration-1000 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}>
