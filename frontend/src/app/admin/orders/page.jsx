@@ -224,7 +224,22 @@ export default function AdminOrdersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-neutral-300 text-sm">{order.items?.length} item{order.items?.length !== 1 ? 's' : ''}</span>
+                        <div className="flex flex-col gap-1 max-w-xs">
+                          {order.items?.map((item, idx) => (
+                            <div key={idx} className="flex items-center gap-2 text-xs text-neutral-300">
+                              <span className="font-semibold text-white truncate max-w-[140px]">{item.name || 'Product'}</span>
+                              <span className="text-neutral-400">×{item.quantity}</span>
+                              {(item.selectedSize || item.size) && (
+                                <span className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 border border-neutral-700 text-[10px]">
+                                  {item.selectedSize || item.size}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                          <span className="text-[11px] text-neutral-500 font-medium mt-0.5">
+                            {order.items?.length} item{order.items?.length !== 1 ? 's' : ''} total
+                          </span>
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-white font-medium">৳{order.total?.toFixed(2)}</span>
@@ -371,22 +386,45 @@ export default function AdminOrdersPage() {
 
               {/* Items */}
               <div className="bg-neutral-800 rounded-xl p-4">
-                <h3 className="text-white font-semibold mb-3">Items</h3>
+                <h3 className="text-white font-semibold mb-3">Ordered Products ({selectedOrder.items?.length || 0})</h3>
                 <div className="space-y-3">
-                  {selectedOrder.items?.map((item, i) => (
-                    <div key={i} className="flex items-center justify-between py-2 border-b border-neutral-700 last:border-0">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-neutral-700 rounded-lg flex items-center justify-center">
-                          <span className="text-sm font-bold text-neutral-400">{item.name?.charAt(0) || 'R'}</span>
+                  {selectedOrder.items?.map((item, i) => {
+                    const img = item.image || item.images?.[0] || item.product?.images?.[0];
+                    const imgUrl = img ? (img.startsWith('http') ? img : (process.env.NEXT_PUBLIC_API_URL || 'https://api.savant.com/api').replace('/api', '') + (img.startsWith('/') ? img : `/${img}`)) : null;
+                    const size = item.selectedSize || item.size;
+                    const color = item.selectedColor || item.color;
+                    return (
+                      <div key={i} className="flex items-center justify-between py-3 border-b border-neutral-700/60 last:border-0">
+                        <div className="flex items-center gap-3">
+                          <div className="w-14 h-14 bg-neutral-900 border border-neutral-700 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
+                            {imgUrl ? (
+                              <img src={imgUrl} alt={item.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-base font-bold text-neutral-400">{item.name?.charAt(0) || 'P'}</span>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-white text-sm font-semibold">{item.name || 'Product'}</p>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <span className="text-neutral-400 text-xs font-mono">Qty: {item.quantity}</span>
+                              {size && (
+                                <span className="px-2 py-0.5 rounded-md bg-neutral-700 text-neutral-200 text-xs font-medium border border-neutral-600">
+                                  Size: {size}
+                                </span>
+                              )}
+                              {color && (
+                                <span className="px-2 py-0.5 rounded-md bg-neutral-700 text-neutral-200 text-xs font-medium border border-neutral-600">
+                                  Color: {color}
+                                </span>
+                              )}
+                              <span className="text-neutral-400 text-xs">@ ৳{item.price?.toFixed(2)} each</span>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-white text-sm">{item.name}</p>
-                          <p className="text-neutral-500 text-xs">Qty: {item.quantity}</p>
-                        </div>
+                        <p className="text-white font-bold text-base">৳{((item.price || 0) * item.quantity).toFixed(2)}</p>
                       </div>
-                      <p className="text-white font-medium">৳{(item.price * item.quantity).toFixed(2)}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 

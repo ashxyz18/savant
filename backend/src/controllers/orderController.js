@@ -2,6 +2,64 @@ import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import { initiateSSLCOMMERZ } from '../lib/sslcommerz.js';
 
+// Helper to batch-populate item product details (name, image, sizes, colors, sku)
+async function populateOrderItems(orderList) {
+  if (!orderList) return orderList;
+  const isArray = Array.isArray(orderList);
+  const list = isArray ? orderList : [orderList];
+
+  const productIds = new Set();
+  for (const o of list) {
+    if (o && Array.isArray(o.items)) {
+      for (const item of o.items) {
+        if (item && item.product) {
+          const pid = typeof item.product === 'object' ? item.product._id : item.product;
+          if (pid) productIds.add(String(pid));
+        }
+      }
+    }
+  }
+
+  const products = productIds.size > 0 
+    ? await Product.find({ _id: { $in: Array.from(productIds) } }).lean()
+    : [];
+
+  const productMap = {};
+  for (const p of products) {
+    productMap[String(p._id)] = p;
+  }
+
+  for (const o of list) {
+    if (o && Array.isArray(o.items)) {
+      for (const item of o.items) {
+        const pid = typeof item.product === 'object' ? item.product._id : item.product;
+        const p = productMap[String(pid)];
+        if (p) {
+          if (!item.name) item.name = p.name;
+          if (!item.image) item.image = p.images?.[0] || p.image || '';
+          if (!item.selectedSize) item.selectedSize = item.size || p.sizes?.[0] || '';
+          if (!item.selectedColor) item.selectedColor = item.color || p.colors?.[0] || '';
+          if (!item.sku) item.sku = p.sku || '';
+          if (!item.category) item.category = p.category || '';
+          item.productDetails = {
+            _id: p._id,
+            name: p.name,
+            sku: p.sku,
+            category: p.category,
+            material: p.material,
+            images: p.images || [],
+            price: p.price,
+            stock: p.stock,
+            sizes: p.sizes || [],
+          };
+        }
+      }
+    }
+  }
+
+  return isArray ? list : list[0];
+}
+
 export const getMyOrders = async (req, res) => {
   try {
     const { page = 1, limit = 10, status } = req.query;
@@ -9,10 +67,12 @@ export const getMyOrders = async (req, res) => {
     if (status) filter.status = status;
 
     const total = await Order.countDocuments(filter);
-    const orders = await Order.find(filter)
+    let orders = await Order.find(filter)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit));
+
+    orders = await populateOrderItems(orders);
 
     res.json({
       orders,
@@ -49,16 +109,19 @@ export const getOrders = async (req, res) => {
         { 'shippingAddress.firstName': { $regex: search, $options: 'i' } },
         { 'shippingAddress.lastName': { $regex: search, $options: 'i' } },
         { 'shippingAddress.email': { $regex: search, $options: 'i' } },
+        { 'items.name': { $regex: search, $options: 'i' } },
       ];
     }
 
     const sortOrder = order === 'asc' ? 1 : -1;
     const total = await Order.countDocuments(filter);
-    const orders = await Order.find(filter)
+    let orders = await Order.find(filter)
       .sort({ [sort]: sortOrder })
       .skip((page - 1) * limit)
       .limit(Number(limit))
       .populate('user', 'name email');
+
+    orders = await populateOrderItems(orders);
 
     res.json({
       orders,
@@ -76,10 +139,11 @@ export const getOrders = async (req, res) => {
 
 export const getOrder = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id).populate('user', 'name email');
+    let order = await Order.findById(req.params.id).populate('user', 'name email');
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
+    order = await populateOrderItems(order);
     res.json(order);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -126,7 +190,9 @@ export const createOrder = async (req, res) => {
       }
       item.price = product.price;
       item.name = product.name;
-      item.image = product.images?.[0] || product.emoji;
+      item.image = product.images?.[0] || product.image || '';
+      item.selectedSize = item.selectedSize || item.size || '';
+      item.selectedColor = item.selectedColor || item.color || '';
       subtotal += product.price * item.quantity;
 
       // Decrease stock

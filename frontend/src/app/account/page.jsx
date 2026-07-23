@@ -25,6 +25,8 @@ export default function AccountPage() {
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('profile');
   const [editProfile, setEditProfile] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showOrderModal, setShowOrderModal] = useState(false);
   const [profileForm, setProfileForm] = useState({
     name: '',
     email: '',
@@ -389,13 +391,13 @@ export default function AccountPage() {
                                 </div>
                               </td>
                               <td className="py-4 px-4">
-                                <button
-                                  onClick={() => router.push(`/orders/${order._id}`)}
-                                  className="text-primary-600 hover:text-primary-700 font-medium text-sm"
-                                >
-                                  View Details
-                                </button>
-                              </td>
+                                 <button
+                                   onClick={() => { setSelectedOrder(order); setShowOrderModal(true); }}
+                                   className="text-primary-600 hover:text-primary-700 font-medium text-sm hover:underline"
+                                 >
+                                   View Details
+                                 </button>
+                               </td>
                             </tr>
                           );
                         })}
@@ -413,16 +415,16 @@ export default function AccountPage() {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Notifications</h3>
                     <div className="space-y-4">
-                      <label className="flex items-center gap-3">
-                        <input type="checkbox" className="rounded border-gray-300" defaultChecked />
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" className="rounded border-gray-300 text-primary-600 focus:ring-primary-500" defaultChecked />
                         <span className="text-gray-700">Email notifications for orders</span>
                       </label>
-                      <label className="flex items-center gap-3">
-                        <input type="checkbox" className="rounded border-gray-300" defaultChecked />
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" className="rounded border-gray-300 text-primary-600 focus:ring-primary-500" defaultChecked />
                         <span className="text-gray-700">Promotional emails</span>
                       </label>
-                      <label className="flex items-center gap-3">
-                        <input type="checkbox" className="rounded border-gray-300" defaultChecked />
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" className="rounded border-gray-300 text-primary-600 focus:ring-primary-500" defaultChecked />
                         <span className="text-gray-700">Order status updates</span>
                       </label>
                     </div>
@@ -430,12 +432,12 @@ export default function AccountPage() {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Privacy</h3>
                     <div className="space-y-4">
-                      <label className="flex items-center gap-3">
-                        <input type="checkbox" className="rounded border-gray-300" defaultChecked />
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" className="rounded border-gray-300 text-primary-600 focus:ring-primary-500" defaultChecked />
                         <span className="text-gray-700">Share profile with sellers</span>
                       </label>
-                      <label className="flex items-center gap-3">
-                        <input type="checkbox" className="rounded border-gray-300" />
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" className="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
                         <span className="text-gray-700">Show purchase history</span>
                       </label>
                     </div>
@@ -455,6 +457,121 @@ export default function AccountPage() {
           </div>
         </div>
       </div>
+
+       {/* Order Details Modal */}
+       {showOrderModal && selectedOrder && (
+         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowOrderModal(false)} />
+           <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 border border-gray-100 z-10">
+             <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-6">
+               <div>
+                 <h2 className="text-xl font-bold text-gray-900">Order Details</h2>
+                 <p className="text-sm text-gray-500 font-mono mt-0.5">{selectedOrder.orderNumber}</p>
+               </div>
+               <button
+                 onClick={() => setShowOrderModal(false)}
+                 className="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 transition-colors"
+               >
+                 ✕
+               </button>
+             </div>
+
+             {/* Order summary info */}
+             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+               <div className="bg-gray-50 rounded-xl p-3.5 border border-gray-100">
+                 <p className="text-xs text-gray-500 mb-1">Status</p>
+                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_CONFIG[selectedOrder.status]?.color || 'bg-gray-100 text-gray-800'}`}>
+                   {STATUS_CONFIG[selectedOrder.status]?.label || selectedOrder.status}
+                 </span>
+               </div>
+               <div className="bg-gray-50 rounded-xl p-3.5 border border-gray-100">
+                 <p className="text-xs text-gray-500 mb-1">Payment</p>
+                 <p className="text-sm font-semibold text-gray-900 capitalize">{selectedOrder.paymentMethod || 'Card'}</p>
+               </div>
+               <div className="bg-gray-50 rounded-xl p-3.5 border border-gray-100 col-span-2 sm:col-span-1">
+                 <p className="text-xs text-gray-500 mb-1">Date</p>
+                 <p className="text-sm font-semibold text-gray-900">{new Date(selectedOrder.createdAt).toLocaleDateString()}</p>
+               </div>
+             </div>
+
+             {/* Delivery Address */}
+             {selectedOrder.shippingAddress && (
+               <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 mb-6">
+                 <h3 className="text-sm font-bold text-gray-900 mb-2">Delivery Address</h3>
+                 <p className="text-sm text-gray-800 font-medium">{selectedOrder.shippingAddress.firstName} {selectedOrder.shippingAddress.lastName}</p>
+                 <p className="text-xs text-gray-600 mt-0.5">{selectedOrder.shippingAddress.address}, {selectedOrder.shippingAddress.city} {selectedOrder.shippingAddress.zipCode}</p>
+                 <p className="text-xs text-gray-600 mt-0.5">Phone: {selectedOrder.shippingAddress.phone} | Email: {selectedOrder.shippingAddress.email}</p>
+               </div>
+             )}
+
+             {/* Product Items list */}
+             <div className="mb-6">
+               <h3 className="text-sm font-bold text-gray-900 mb-3">Products in Order ({selectedOrder.items?.length || 0})</h3>
+               <div className="space-y-3">
+                 {selectedOrder.items?.map((item, idx) => {
+                   const img = item.image || item.images?.[0] || item.product?.images?.[0];
+                   const imgUrl = img ? (img.startsWith('http') ? img : (process.env.NEXT_PUBLIC_API_URL || 'https://api.savant.com/api').replace('/api', '') + (img.startsWith('/') ? img : `/${img}`)) : null;
+                   const size = item.selectedSize || item.size;
+                   const color = item.selectedColor || item.color;
+                   return (
+                     <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                       <div className="flex items-center gap-3">
+                         <div className="w-14 h-14 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+                           {imgUrl ? (
+                             <img src={imgUrl} alt={item.name} className="w-full h-full object-cover" />
+                           ) : (
+                             <span className="text-base font-bold text-gray-400">{item.name?.charAt(0) || 'P'}</span>
+                           )}
+                         </div>
+                         <div>
+                           <p className="text-sm font-semibold text-gray-900">{item.name || 'Product'}</p>
+                           <div className="flex items-center gap-2 mt-1 flex-wrap">
+                             <span className="text-xs text-gray-500 font-mono">Qty: {item.quantity}</span>
+                             {size && (
+                               <span className="px-2 py-0.5 rounded bg-white text-gray-700 text-xs font-medium border border-gray-200">
+                                 Size: {size}
+                               </span>
+                             )}
+                             {color && (
+                               <span className="px-2 py-0.5 rounded bg-white text-gray-700 text-xs font-medium border border-gray-200">
+                                 Color: {color}
+                               </span>
+                             )}
+                           </div>
+                         </div>
+                       </div>
+                       <div className="text-right">
+                         <p className="text-sm font-bold text-gray-900">{formatBDT(item.price * item.quantity)}</p>
+                         <p className="text-[11px] text-gray-500">({formatBDT(item.price)} each)</p>
+                       </div>
+                     </div>
+                   );
+                 })}
+               </div>
+             </div>
+
+             {/* Order Breakdown */}
+             <div className="border-t border-gray-100 pt-4 space-y-2 text-sm">
+               <div className="flex justify-between text-gray-600">
+                 <span>Subtotal</span>
+                 <span>{formatBDT(selectedOrder.subtotal)}</span>
+               </div>
+               <div className="flex justify-between text-gray-600">
+                 <span>Shipping</span>
+                 <span>{selectedOrder.shippingCost === 0 ? 'Free' : formatBDT(selectedOrder.shippingCost)}</span>
+               </div>
+               <div className="flex justify-between text-gray-600">
+                 <span>Tax</span>
+                 <span>{formatBDT(selectedOrder.tax)}</span>
+               </div>
+               <div className="flex justify-between font-bold text-base text-gray-900 pt-2 border-t border-gray-100">
+                 <span>Total Amount</span>
+                 <span className="text-primary-700">{formatBDT(selectedOrder.total)}</span>
+               </div>
+             </div>
+           </div>
+         </div>
+       )}
     </div>
   );
 }
