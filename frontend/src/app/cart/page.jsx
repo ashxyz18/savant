@@ -66,11 +66,13 @@ export default function CartPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
-            {items.map(({ product, quantity }) => (
-              <div
-                key={product._id}
-                className="bg-white rounded-xl border border-neutral-200 p-4 sm:p-6 flex gap-4 sm:gap-6"
-              >
+            {items.map((item) => {
+              const { product, quantity } = item;
+              return (
+                <div
+                  key={`${product._id}-${item.selectedSize || ''}-${item.selectedColor || ''}`}
+                  className="bg-white rounded-xl border border-neutral-200 p-4 sm:p-6 flex gap-4 sm:gap-6"
+                >
                 <button
                   onClick={() => router.push(productUrl(product._id))}
                   className="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-neutral-50 to-neutral-100 rounded-lg overflow-hidden relative"
@@ -154,9 +156,8 @@ export default function CartPage() {
                       </button>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
 
             <div className="flex justify-end">
               <button
