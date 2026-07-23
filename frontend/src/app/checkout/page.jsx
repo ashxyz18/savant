@@ -658,30 +658,37 @@ export default function CheckoutPage() {
               </h2>
 
               <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
-                {items.map(({ product, quantity }) => (
-                  <div key={product._id} className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-neutral-100 rounded-lg flex-shrink-0 overflow-hidden relative">
-                      {product.images?.[0] ? (
-                        <Image
-                          src={getImageUrl(product.images[0])}
-                          alt={product.name}
-                          fill
-                          sizes="48px"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <span className="text-sm font-bold text-neutral-300 absolute inset-0 flex items-center justify-center">{product.name?.charAt(0) || 'R'}</span>
-                      )}
+                {items.map((item, idx) => {
+                  const { product, quantity, selectedSize, selectedColor } = item;
+                  return (
+                    <div key={`${product._id}-${idx}`} className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-neutral-100 rounded-lg flex-shrink-0 overflow-hidden relative">
+                        {product.images?.[0] ? (
+                          <Image
+                            src={getImageUrl(product.images[0])}
+                            alt={product.name}
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <span className="text-sm font-bold text-neutral-300 absolute inset-0 flex items-center justify-center">{product.name?.charAt(0) || 'S'}</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-neutral-800 truncate">{product.name}</p>
+                        <div className="flex items-center gap-1.5 text-xs text-neutral-500 flex-wrap">
+                          <span>Qty: {quantity}</span>
+                          {selectedSize && <span className="font-semibold text-neutral-700 bg-neutral-100 px-1.5 py-0.2 rounded border">Size: {selectedSize}</span>}
+                          {selectedColor && <span className="font-semibold text-neutral-700 bg-neutral-100 px-1.5 py-0.2 rounded border">Color: {selectedColor}</span>}
+                        </div>
+                      </div>
+                      <p className="text-sm font-medium text-neutral-900">
+                        {formatBDT(product.price * quantity)}
+                      </p>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-neutral-800 truncate">{product.name}</p>
-                      <p className="text-xs text-neutral-500">Qty: {quantity}</p>
-                    </div>
-                    <p className="text-sm font-medium text-neutral-900">
-                      {formatBDT(product.price * quantity)}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="border-t border-neutral-200 pt-4 space-y-2 text-sm">
