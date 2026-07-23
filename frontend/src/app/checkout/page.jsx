@@ -52,9 +52,11 @@ export default function CheckoutPage() {
     cvv: '',
   });
 
-  const shippingCost = subtotal > 100 ? 0 : 10;
-  const tax = subtotal * 0.08;
-  const total = subtotal + shippingCost + tax;
+  const [deliveryZone, setDeliveryZone] = useState('inside_dhaka'); // 'inside_dhaka' (৳80) or 'outside_dhaka' (৳120)
+
+  const shippingCost = deliveryZone === 'inside_dhaka' ? 80 : 120;
+  const tax = 0;
+  const total = subtotal + shippingCost;
 
   const handleShippingChange = (e) => {
     setShipping({ ...shipping, [e.target.name]: e.target.value });
@@ -259,8 +261,52 @@ export default function CheckoutPage() {
             {step === 1 && (
               <div className="bg-white rounded-xl border border-neutral-200 p-6">
                 <div className="flex items-center gap-2 mb-6">
-                  <MapPin size={20} className="text-primary-400" />
-                  <h2 className="text-lg font-bold text-neutral-900">Shipping Information</h2>
+                  <MapPin size={20} className="text-[#7B1E3B]" />
+                  <h2 className="text-lg font-bold text-neutral-900">Shipping & Delivery Zone</h2>
+                </div>
+
+                {/* Delivery Zone Selector */}
+                <div className="mb-6 bg-neutral-50 p-4 rounded-xl border border-neutral-200">
+                  <label className="block text-sm font-bold text-neutral-800 mb-2.5">
+                    Select Delivery Location *
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setDeliveryZone('inside_dhaka')}
+                      className={`p-3.5 rounded-xl border text-left flex items-center justify-between transition-all ${
+                        deliveryZone === 'inside_dhaka'
+                          ? 'border-[#7B1E3B] bg-white ring-2 ring-[#7B1E3B]/20 shadow-sm'
+                          : 'border-neutral-200 bg-white hover:border-neutral-300'
+                      }`}
+                    >
+                      <div>
+                        <p className="text-sm font-bold text-neutral-900">Inside Dhaka</p>
+                        <p className="text-xs text-neutral-500">Dhaka City Delivery</p>
+                      </div>
+                      <span className="text-sm font-extrabold text-[#7B1E3B] bg-[#7B1E3B]/10 px-2.5 py-1 rounded-lg">
+                        ৳80
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setDeliveryZone('outside_dhaka')}
+                      className={`p-3.5 rounded-xl border text-left flex items-center justify-between transition-all ${
+                        deliveryZone === 'outside_dhaka'
+                          ? 'border-[#7B1E3B] bg-white ring-2 ring-[#7B1E3B]/20 shadow-sm'
+                          : 'border-neutral-200 bg-white hover:border-neutral-300'
+                      }`}
+                    >
+                      <div>
+                        <p className="text-sm font-bold text-neutral-900">Outside Dhaka</p>
+                        <p className="text-xs text-neutral-500">All Other Districts 🇧🇩</p>
+                      </div>
+                      <span className="text-sm font-extrabold text-[#7B1E3B] bg-[#7B1E3B]/10 px-2.5 py-1 rounded-lg">
+                        ৳120
+                      </span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -644,18 +690,8 @@ export default function CheckoutPage() {
                   <span>{formatBDT(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-neutral-600">
-                  <span>Shipping</span>
-                  <span>
-                    {shippingCost === 0 ? (
-                      <span className="text-green-600 font-medium">Free</span>
-                    ) : (
-                      formatBDT(shippingCost)
-                    )}
-                  </span>
-                </div>
-                <div className="flex justify-between text-neutral-600">
-                  <span>Tax</span>
-                  <span>{formatBDT(tax)}</span>
+                  <span>Shipping ({deliveryZone === 'inside_dhaka' ? 'Inside Dhaka' : 'Outside Dhaka'})</span>
+                  <span className="font-bold text-neutral-900">{formatBDT(shippingCost)}</span>
                 </div>
                 <div className="border-t border-neutral-200 pt-2 flex justify-between font-bold text-neutral-900 text-base">
                   <span>Total</span>

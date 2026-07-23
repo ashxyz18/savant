@@ -436,8 +436,8 @@ function ProductDetailPage() {
                 </button>
               </div>
 
-              {/* Share button */}
-              <div className="flex items-center justify-between pt-2">
+              {/* Share button & Delivery info */}
+              <div className="flex items-center justify-between pt-2 flex-wrap gap-2">
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(window.location.href);
@@ -448,7 +448,9 @@ function ProductDetailPage() {
                   <Share2 size={14} />
                   Share this product
                 </button>
-                <span className="text-xs text-neutral-400">⚡ Fast Shipping Nationwide</span>
+                <span className="text-xs font-semibold text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-md">
+                  🚚 Delivery: ৳80 Inside Dhaka | ৳120 Outside
+                </span>
               </div>
             </div>
 
@@ -456,18 +458,18 @@ function ProductDetailPage() {
             <div className="grid grid-cols-3 gap-3 pt-4 border-t border-neutral-100">
               <div className="p-3 bg-neutral-50 rounded-xl text-center border border-neutral-100">
                 <Shield size={18} className="text-[#7B1E3B] mx-auto mb-1" />
-                <p className="text-xs font-bold text-neutral-800">2-Year Warranty</p>
-                <p className="text-[10px] text-neutral-400 mt-0.5">Leather Guarantee</p>
+                <p className="text-xs font-bold text-neutral-800">{product.warranty || '6 Months Warranty'}</p>
+                <p className="text-[10px] text-neutral-400 mt-0.5">Product Guarantee</p>
               </div>
               <div className="p-3 bg-neutral-50 rounded-xl text-center border border-neutral-100">
                 <RotateCcw size={18} className="text-[#7B1E3B] mx-auto mb-1" />
                 <p className="text-xs font-bold text-neutral-800">Easy Returns</p>
-                <p className="text-[10px] text-neutral-400 mt-0.5">30 Days Return</p>
+                <p className="text-[10px] text-neutral-400 mt-0.5">3 Days Return Policy</p>
               </div>
               <div className="p-3 bg-neutral-50 rounded-xl text-center border border-neutral-100">
                 <Truck size={18} className="text-[#7B1E3B] mx-auto mb-1" />
-                <p className="text-xs font-bold text-neutral-800">Fast Delivery</p>
-                <p className="text-[10px] text-neutral-400 mt-0.5">All Over BD 🇧🇩</p>
+                <p className="text-xs font-bold text-neutral-800">Delivery Charge</p>
+                <p className="text-[10px] text-neutral-400 mt-0.5">৳80 Dhaka | ৳120 Outside</p>
               </div>
             </div>
           </div>
@@ -561,7 +563,7 @@ function ProductDetailPage() {
                   </div>
                   <div className="flex justify-between p-3.5 bg-neutral-50">
                     <span className="text-neutral-500 font-medium">Warranty</span>
-                    <span className="font-semibold text-neutral-900">2-Year Full Leather Warranty</span>
+                    <span className="font-semibold text-neutral-900">{product.warranty || '6 Months Warranty'}</span>
                   </div>
                   <div className="flex justify-between p-3.5">
                     <span className="text-neutral-500 font-medium">Origin</span>

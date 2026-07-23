@@ -46,6 +46,7 @@ export default function AdminProductsPage() {
     isActive: true,
     tags: '',
     sizes: '',
+    warranty: '6 Months',
     dimensionHeight: '',
     dimensionWidth: '',
     dimensionDepth: '',
@@ -92,6 +93,7 @@ export default function AdminProductsPage() {
       isActive: true,
       tags: '',
       sizes: '',
+      warranty: '6 Months',
       dimensionHeight: '',
       dimensionWidth: '',
       dimensionDepth: '',
@@ -126,6 +128,7 @@ export default function AdminProductsPage() {
       isActive: product.isActive,
       tags: product.tags?.join(', ') || '',
       sizes: (product.sizes || []).join(', '),
+      warranty: product.warranty || '6 Months',
       dimensionHeight: product.dimensions?.height || '',
       dimensionWidth: product.dimensions?.width || '',
       dimensionDepth: product.dimensions?.depth || '',
@@ -169,6 +172,7 @@ export default function AdminProductsPage() {
       if (form.subcategory) formData.append('subcategory', form.subcategory);
       if (form.sku) formData.append('sku', form.sku);
       formData.append('material', form.material);
+      if (form.warranty) formData.append('warranty', form.warranty);
       formData.append('stock', form.stock);
       formData.append('colorCount', form.colorCount);
       formData.append('featured', form.featured);
@@ -660,6 +664,16 @@ export default function AdminProductsPage() {
                         type="text"
                         value={form.material}
                         onChange={(e) => setForm(f => ({ ...f, material: e.target.value }))}
+                        className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-300 mb-2">Warranty Period</label>
+                      <input
+                        type="text"
+                        value={form.warranty}
+                        onChange={(e) => setForm(f => ({ ...f, warranty: e.target.value }))}
+                        placeholder="e.g. 6 Months, 1 Year, 2 Years"
                         className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       />
                     </div>
