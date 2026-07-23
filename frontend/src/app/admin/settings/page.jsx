@@ -335,6 +335,121 @@ export default function AdminSettings() {
         </Field>
       </SectionCard>
 
+      {/* Facebook & Instagram Auto-Posting */}
+      <SectionCard title="Facebook & Instagram Auto-Posting" icon={Share2}>
+        <div className="md:col-span-2 bg-neutral-800/60 p-4 rounded-xl border border-neutral-700/60 mb-2">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-sm font-bold text-white">Enable Social Auto-Posting</p>
+              <p className="text-xs text-neutral-400">Automatically publish new products to Meta platforms upon creation</p>
+            </div>
+            <input
+              type="checkbox"
+              checked={form.socialAutoPost?.enabled || false}
+              onChange={(e) => setNested('socialAutoPost', 'enabled', e.target.checked)}
+              className="w-5 h-5 accent-[#7B1E3B] cursor-pointer"
+            />
+          </div>
+
+          <div className="flex items-center gap-6 pt-3 border-t border-neutral-700/50">
+            <label className="flex items-center gap-2 text-xs font-semibold text-neutral-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.socialAutoPost?.postToFacebook !== false}
+                onChange={(e) => setNested('socialAutoPost', 'postToFacebook', e.target.checked)}
+                className="w-4 h-4 accent-[#7B1E3B]"
+              />
+              Post to Facebook Page
+            </label>
+            <label className="flex items-center gap-2 text-xs font-semibold text-neutral-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.socialAutoPost?.postToInstagram !== false}
+                onChange={(e) => setNested('socialAutoPost', 'postToInstagram', e.target.checked)}
+                className="w-4 h-4 accent-[#7B1E3B]"
+              />
+              Post to Instagram Business
+            </label>
+          </div>
+        </div>
+
+        <Field label="Facebook Page ID" hint="Find in Facebook Page Settings → Page Info">
+          <input
+            className={inputClass}
+            value={form.socialAutoPost?.fbPageId || ''}
+            onChange={(e) => setNested('socialAutoPost', 'fbPageId', e.target.value)}
+            placeholder="e.g. 102938475647382"
+          />
+        </Field>
+
+        <Field label="Instagram Business Account ID" hint="Linked Instagram Business Account ID">
+          <input
+            className={inputClass}
+            value={form.socialAutoPost?.igAccountId || ''}
+            onChange={(e) => setNested('socialAutoPost', 'igAccountId', e.target.value)}
+            placeholder="e.g. 17841401234567890"
+          />
+        </Field>
+
+        <div className="md:col-span-2">
+          <Field label="Meta Page Access Token" hint="Generate Page Access Token from Meta Developer Portal (Graph API Explorer)">
+            <textarea
+              rows={2}
+              className={inputClass}
+              value={form.socialAutoPost?.fbAccessToken || ''}
+              onChange={(e) => setNested('socialAutoPost', 'fbAccessToken', e.target.value)}
+              placeholder="EAAG..."
+            />
+          </Field>
+        </div>
+
+        <div className="md:col-span-2">
+          <Field label="Caption Template" hint="Variables available: {productName}, {price}, {sku}, {sizes}, {productUrl}, {description}">
+            <textarea
+              rows={4}
+              className={inputClass}
+              value={form.socialAutoPost?.captionTemplate || ''}
+              onChange={(e) => setNested('socialAutoPost', 'captionTemplate', e.target.value)}
+              placeholder="✨ NEW ARRIVAL AT SAVANT ✨&#10;&#10;👜 {productName}&#10;💰 Price: {price}&#10;🏷️ {sku}&#10;&#10;🛒 Order now: {productUrl}"
+            />
+          </Field>
+        </div>
+
+        <div className="md:col-span-2 flex items-center justify-end gap-3 pt-2">
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                toast.loading('Publishing test post to Facebook...', { id: 'fbTest' });
+                const res = await api.testSocialPost({ platform: 'facebook' });
+                toast.success(res.message || 'Facebook test post published successfully!', { id: 'fbTest' });
+              } catch (err) {
+                toast.error(err.message || 'Facebook test post failed', { id: 'fbTest' });
+              }
+            }}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-2"
+          >
+            🧪 Test Facebook Post
+          </button>
+
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                toast.loading('Publishing test post to Instagram...', { id: 'igTest' });
+                const res = await api.testSocialPost({ platform: 'instagram' });
+                toast.success(res.message || 'Instagram test post published successfully!', { id: 'igTest' });
+              } catch (err) {
+                toast.error(err.message || 'Instagram test post failed', { id: 'igTest' });
+              }
+            }}
+            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-2"
+          >
+            🧪 Test Instagram Post
+          </button>
+        </div>
+      </SectionCard>
+
       {/* SMTP / Email */}
       <SectionCard title="Email (SMTP) Settings" icon={Server}>
         <Field label="SMTP Host">

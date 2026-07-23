@@ -299,6 +299,10 @@ class ApiClient {
   updateSettings(data) {
     return this.put('/settings', data);
   }
+
+  testSocialPost(data) {
+    return this.post('/settings/test-social-post', data);
+  }
 }
 
 const api = new ApiClient();

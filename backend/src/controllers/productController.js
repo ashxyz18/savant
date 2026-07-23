@@ -1,5 +1,6 @@
 import Product from '../models/Product.js';
 import { uploadToCloudinary } from '../middleware/upload.js';
+import { autoPostProduct } from '../services/socialPoster.js';
 
 export const getProducts = async (req, res) => {
   try {
@@ -169,6 +170,12 @@ export const createProduct = async (req, res) => {
     }
 
     const product = await Product.create(productData);
+
+    // Auto-post new product to Facebook Page & Instagram Business in background
+    autoPostProduct(product).catch((err) => {
+      console.error('[Social Auto-Post] Async error:', err.message);
+    });
+
     res.status(201).json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
