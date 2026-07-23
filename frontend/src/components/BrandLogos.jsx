@@ -74,7 +74,7 @@ const BrandLogos = () => {
                   />
                 ) : (
                   <span className="text-neutral-900 font-bold text-lg group-hover:text-primary-900 transition-colors duration-300">
-                    {brand.name.charAt(0)}
+                    {brand.name?.charAt(0) || 'B'}
                   </span>
                 )}
               </div>

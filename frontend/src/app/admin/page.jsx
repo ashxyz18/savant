@@ -127,9 +127,9 @@ export default function AdminDashboard() {
   }));
 
   const ordersByStatusData = stats.charts.ordersByStatus.map((item) => ({
-    name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
+    name: item._id ? item._id.charAt(0).toUpperCase() + item._id.slice(1) : 'Other',
     value: item.count,
-    color: STATUS_COLORS[item._id] || '#6b7280',
+    color: (item._id && STATUS_COLORS[item._id]) || '#6b7280',
   }));
 
   const categoryData = stats.charts.categoryDistribution.map((item, i) => ({
