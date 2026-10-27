@@ -1,20 +1,27 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
-import { ArrowRight, Shield, Truck, RotateCcw, ImageIcon, Loader2, ChevronDown } from 'lucide-react';
-import { getImageUrl } from '../lib/image';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowRight, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 import api from '../lib/api';
 
+// Words that cycle (italic serif) under the main headline line
+const DEFAULT_WORDS = ['daily commute.', 'long weekend.', 'boardroom.', 'open road.'];
+const WORD_INTERVAL_MS = 3500;
+
+const PERKS = [
+  { icon: ShieldCheck, title: 'Warranty', text: 'Guaranteed on every piece' },
+  { icon: Truck, title: 'Delivery', text: 'Dhaka ৳80 · Outside ৳120' },
+  { icon: RotateCcw, title: 'Returns', text: '3-day easy returns' },
+];
+
 const Hero = () => {
+  const router = useRouter();
   const [heroBanner, setHeroBanner] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const heroRef = useRef(null);
+  const [wordIndex, setWordIndex] = useState(0);
 
   useEffect(() => {
-    // Trigger entrance animation after mount
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
@@ -23,61 +30,47 @@ const Hero = () => {
     const loadHeroBanner = async () => {
       try {
         const banners = await api.getBanners({ position: 'hero', isActive: 'true' });
-        if (banners && banners.length > 0) {
-          setHeroBanner(banners[0]);
-        }
+        if (banners && banners.length > 0) setHeroBanner(banners[0]);
       } catch (error) {
         console.error('Failed to load hero banner:', error);
-      } finally {
-        setLoading(false);
       }
     };
     loadHeroBanner();
   }, []);
 
-  // Subtle parallax on mouse move
-  const handleMouseMove = (e) => {
-    if (!heroRef.current) return;
-    const rect = heroRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setMousePos({ x, y });
+  // Admin banner subtitle (if set) leads the rotating words
+  const words = heroBanner?.subtitle ? [heroBanner.subtitle, ...DEFAULT_WORDS] : DEFAULT_WORDS;
+
+  useEffect(() => {
+    const id = setInterval(() => setWordIndex((i) => (i + 1) % words.length), WORD_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [words.length]);
+
+  const scrollToProducts = () => {
+    document.getElementById('product-section')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleStartShopping = () => {
-    const section = document.getElementById('product-section');
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
-    }
+  const handleShopBackpacks = () => {
+    router.push('/?category=backpacks', { scroll: false });
+    setTimeout(scrollToProducts, 150);
   };
 
-  const handleScrollDown = () => {
-    const section = document.getElementById('product-section');
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const heroTitle = heroBanner?.title || 'Built for the';
+  const heroDescription =
+    heroBanner?.description ||
+    'Considered backpacks and leather goods, designed to move with you — refined in form, uncompromising in function.';
 
-  const features = [
-    { icon: <Shield className="w-4 h-4" />, text: 'Warranty Guaranteed' },
-    { icon: <Truck className="w-4 h-4" />, text: 'Dhaka ৳80 | Outside ৳120' },
-    { icon: <RotateCcw className="w-4 h-4" />, text: '3-Day Returns' },
-  ];
+  const reveal = (delay) =>
+    `transition-all duration-1000 ease-out ${delay} ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`;
 
-  const heroTitle = heroBanner?.title || 'Crafted for';
-  const heroSubtitle = heroBanner?.subtitle || 'Timeless Elegance';
-  const heroDescription = heroBanner?.description || 'Discover our premium leather collection where craftsmanship meets contemporary design. Each piece is meticulously crafted using sustainable materials.';
+  const pad = (n) => String(n).padStart(2, '0');
 
   return (
-    <section
-      ref={heroRef}
-      onMouseMove={handleMouseMove}
-      className="relative overflow-hidden bg-primary-950 min-h-[55vh] sm:min-h-[85vh]"
-    >
-      {/* Background video - full bleed object-cover without letterbox gaps */}
-      <div className="absolute inset-0 z-0 h-full w-full bg-primary-950">
+    <section className="relative overflow-hidden bg-primary-950 min-h-[78vh] sm:min-h-[90vh] flex flex-col">
+      {/* Background video with slow settle-in zoom */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <video
-          className="h-full w-full object-cover object-center"
+          className="hero-video h-full w-full object-cover object-center"
           src="/hero-video.mp4"
           autoPlay
           muted
@@ -86,111 +79,100 @@ const Hero = () => {
         />
       </div>
 
-      {/* Maroon overlay for readability */}
-      <div className="absolute inset-0 z-10 bg-gradient-to-b from-primary-950/60 via-primary-900/40 to-primary-950/80" />
+      {/* Cinematic overlays */}
+      <div className="absolute inset-0 z-10 bg-gradient-to-r from-primary-950/90 via-primary-950/55 to-primary-950/10" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-t from-primary-950 via-primary-950/30 to-transparent" />
+      <div className="absolute inset-0 z-10 pointer-events-none [background:radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.35))]" />
 
-      {/* Animated background decoration with parallax */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
-        <div
-          className="absolute -top-40 -right-40 w-80 h-80 bg-primary-100/30 rounded-full blur-3xl animate-float"
-          style={{
-            transform: `translate(${mousePos.x * 20}px, ${mousePos.y * 20}px)`,
-            transition: 'transform 0.3s ease-out',
-          }}
-        />
-        <div
-          className="absolute -bottom-40 -left-40 w-96 h-96 bg-primary-50/30 rounded-full blur-3xl animate-float"
-          style={{
-            animationDelay: '2s',
-            transform: `translate(${mousePos.x * -15}px, ${mousePos.y * -15}px)`,
-            transition: 'transform 0.3s ease-out',
-          }}
-        />
-      </div>
-
-      <div className="container relative z-20 mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex min-h-[55vh] sm:min-h-[85vh] flex-col items-start justify-end py-8 sm:py-20 text-left">
-          <div className={`max-w-3xl transition-all duration-1000 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}>
-            <div className={`inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm text-white rounded-full text-xs font-medium mb-6 tracking-wider uppercase transition-all duration-700 delay-200 ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-            }`}>
-              <span className="w-1.5 h-1.5 bg-success-400 rounded-full animate-pulse" />
-              {heroBanner?.buttonText || 'New Collection 2025'}
+      {/* Main content */}
+      <div className="container relative z-20 flex-1 flex items-end">
+        <div className="w-full pt-16 pb-10 sm:pb-16">
+          <div className="max-w-2xl">
+            {/* Eyebrow */}
+            <div className={`flex items-center gap-4 mb-6 sm:mb-8 ${reveal('delay-150')}`}>
+              <span className="hero-line block h-px w-10 sm:w-14 bg-[#d9c3a0]" />
+              <span className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.32em] text-white/75">
+                {heroBanner?.buttonText || 'The 2025 Collection'}
+              </span>
             </div>
 
-            <h1 className={`font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6 transition-all duration-700 delay-300 ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-            }`}>
-              {heroTitle}
-              <span className="block text-gradient-primary">{heroSubtitle}</span>
+            {/* Headline */}
+            <h1 className={`font-serif font-light text-white leading-[0.95] tracking-tight text-[2.9rem] sm:text-6xl lg:text-[5.5rem] mb-6 sm:mb-8 ${reveal('delay-300')}`}>
+              <span className="block">{heroTitle}</span>
+              <span className="block h-[1.1em] overflow-hidden">
+                <span key={wordIndex} className="hero-word italic text-champagne">
+                  {words[wordIndex]}
+                </span>
+              </span>
             </h1>
 
-            <p className={`text-base text-white/80 mb-8 max-w-xl mx-auto leading-relaxed transition-all duration-700 delay-[400ms] ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-            }`}>
+            <p className={`text-sm sm:text-base text-white/70 font-light leading-relaxed max-w-md mb-8 sm:mb-10 ${reveal('delay-500')}`}>
               {heroDescription}
             </p>
 
-            {/* Features */}
-            <div className={`flex flex-wrap gap-3 mb-10 justify-start transition-all duration-700 delay-500 ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-            }`}>
-              {features.map((feature, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:border-white/40 transition-all duration-300 cursor-default group/feature"
-                >
-                  <div className="text-white group-hover/feature:scale-110 transition-transform duration-200">{feature.icon}</div>
-                  <span className="text-xs font-medium text-white/90">{feature.text}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA Buttons */}
-            <div className={`flex flex-col sm:flex-row gap-3 justify-start transition-all duration-700 delay-[600ms] ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-            }`}>
+            {/* CTAs */}
+            <div className={`flex flex-wrap items-center gap-x-8 gap-y-4 ${reveal('delay-700')}`}>
               <button
-                onClick={handleStartShopping}
-                className="btn-primary group flex items-center justify-center gap-2 hover:shadow-glow-primary"
+                onClick={scrollToProducts}
+                className="group inline-flex items-center gap-3 bg-[#f4ece0] text-primary-950 px-7 py-3.5 text-[11px] font-semibold uppercase tracking-[0.22em] hover:bg-white transition-colors duration-300"
               >
-                Start Shopping
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+                Shop the Collection
+                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={1.5} />
+              </button>
+              <button
+                onClick={handleShopBackpacks}
+                className="group relative text-[11px] font-semibold uppercase tracking-[0.22em] text-white py-2"
+              >
+                Explore Backpacks
+                <span className="absolute left-0 bottom-0 h-px w-full bg-white/40" />
+                <span className="absolute left-0 bottom-0 h-px w-full bg-[#d9c3a0] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
               </button>
             </div>
 
-            {/* Stats */}
-            <div className={`mt-8 flex items-center gap-8 justify-start transition-all duration-700 delay-700 ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-            }`}>
-              {[
-                { value: '500+', label: 'Happy Customers' },
-                { value: '4.9', label: 'Average Rating' },
-              ].map((stat, i) => (
-                <React.Fragment key={i}>
-                  {i > 0 && <div className="w-px h-10 bg-white/20" />}
-                  <div className="group cursor-default">
-                    <div className="text-2xl font-bold text-white group-hover:text-primary-200 transition-colors duration-300">{stat.value}</div>
-                    <div className="text-xs text-white/70 font-medium">{stat.label}</div>
-                  </div>
-                </React.Fragment>
-              ))}
+            {/* Word index + progress */}
+            <div className={`mt-10 sm:mt-14 flex items-center gap-4 text-[11px] tracking-[0.2em] text-white/60 font-medium ${reveal('delay-1000')}`}>
+              <span className="text-white tabular-nums">{pad(wordIndex + 1)}</span>
+              <span className="relative block h-px w-20 sm:w-28 bg-white/20 overflow-hidden">
+                <span
+                  key={wordIndex}
+                  className="hero-progress absolute inset-0 bg-[#d9c3a0]"
+                  style={{ '--hero-interval': `${WORD_INTERVAL_MS}ms` }}
+                />
+              </span>
+              <span className="tabular-nums">{pad(words.length)}</span>
             </div>
           </div>
         </div>
+
+        {/* Scroll cue (desktop) */}
+        <button
+          type="button"
+          onClick={scrollToProducts}
+          aria-label="Scroll to products"
+          className={`hidden lg:flex absolute right-8 bottom-16 flex-col items-center gap-4 transition-opacity duration-1000 delay-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+        >
+          <span className="text-[10px] uppercase tracking-[0.3em] text-white/60 [writing-mode:vertical-rl]">Scroll</span>
+          <span className="relative block w-px h-16 bg-white/15 overflow-hidden">
+            <span className="hero-scroll-cue absolute inset-x-0 top-0 h-1/2 bg-white/80" />
+          </span>
+        </button>
       </div>
 
-      {/* Scroll indicator */}
-      <div
-        className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer transition-all duration-700 delay-1000 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-        }`}
-        onClick={handleScrollDown}
-      >
-        <span className="text-[10px] text-neutral-400 uppercase tracking-widest font-medium">Scroll</span>
-        <ChevronDown className="w-4 h-4 text-neutral-400 animate-bounce" />
+      {/* Perks bar */}
+      <div className={`relative z-20 border-t border-white/10 bg-primary-950/40 backdrop-blur-md transition-opacity duration-1000 delay-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="container">
+          <div className="grid grid-cols-3 divide-x divide-white/10">
+            {PERKS.map(({ icon: Icon, title, text }) => (
+              <div key={title} className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-4 py-4 sm:py-5 px-2 sm:px-6 first:sm:pl-0 text-center sm:text-left">
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#d9c3a0] shrink-0" strokeWidth={1.25} />
+                <div>
+                  <div className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-white font-medium">{title}</div>
+                  <div className="hidden sm:block text-xs text-white/55 font-light mt-0.5">{text}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

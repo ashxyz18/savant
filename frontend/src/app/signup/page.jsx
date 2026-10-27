@@ -136,7 +136,7 @@ export default function SignupPage() {
 
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                Mobile Number <span className="text-neutral-400 font-normal">(Bangladeshi 🇧🇩)</span>
+                Mobile Number <span className="text-neutral-400 font-normal">(Bangladesh)</span>
               </label>
               <div className="flex">
                 <span className="inline-flex items-center px-3.5 rounded-l-xl border border-r-0 border-neutral-200 bg-neutral-50 text-sm text-neutral-600 font-semibold">

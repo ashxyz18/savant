@@ -144,41 +144,41 @@ const Features = () => {
           </div>
 
           <div className="relative">
-            <h3 className="font-display text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4">
-              Join Our Premium Membership
+            <h3 className="font-serif font-light text-2xl md:text-3xl lg:text-4xl text-white mb-4">
+              The SAVANT Standard
             </h3>
-            <p className="text-primary-200 mb-10 max-w-xl mx-auto">
-               Get exclusive access to early sales, member-only discounts, and personalized style recommendations.
+            <p className="text-primary-200 mb-8 max-w-xl mx-auto text-sm sm:text-base font-light leading-relaxed">
+              Designed in Dhaka, crafted by seasoned artisans. Every piece is built with enduring materials, reinforced stress points, and understated elegance.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
                 href="/signup"
-                className="group px-8 py-4 bg-white text-primary-900 rounded-lg font-semibold hover:bg-primary-50 transition-all duration-300 hover:shadow-glow flex items-center gap-2"
+                className="group px-8 py-3.5 bg-[#f4ece0] text-primary-950 rounded-lg text-xs font-semibold uppercase tracking-[0.2em] hover:bg-white transition-all duration-300 flex items-center gap-2"
               >
-                Sign Up Free
+                Create Account
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
               </a>
               <a
-                href="#"
-                className="px-8 py-4 border border-primary-400/30 text-white rounded-lg font-semibold hover:border-white hover:bg-white/10 transition-all duration-300"
+                href="#product-section"
+                className="px-8 py-3.5 border border-white/20 text-white rounded-lg text-xs font-semibold uppercase tracking-[0.2em] hover:border-white hover:bg-white/10 transition-all duration-300"
               >
-                Learn More
+                Explore Collection
               </a>
             </div>
 
-            <div className="mt-10 flex flex-wrap justify-center gap-6 text-sm text-primary-300">
-              <span className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 bg-success-400 rounded-full" />
-                No credit card required
+            <div className="mt-8 flex flex-wrap justify-center gap-6 text-xs text-primary-300">
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-[#d9c3a0] rounded-full" />
+                Cash on Delivery Available
               </span>
-              <span className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 bg-success-400 rounded-full" />
-                Cancel anytime
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-[#d9c3a0] rounded-full" />
+                Nationwide Fast Shipping
               </span>
-              <span className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 bg-success-400 rounded-full" />
-                First month free
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-[#d9c3a0] rounded-full" />
+                6-Month Warranty
               </span>
             </div>
           </div>

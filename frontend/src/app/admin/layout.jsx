@@ -54,7 +54,7 @@ export default function AdminLayout({ children }) {
     const next = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
     localStorage.setItem('adminTheme', next);
-    toast.success(`Switched to ${next === 'light' ? 'Light (White)' : 'Dark (Black)'} Mode`, { icon: next === 'light' ? '☀️' : '🌙' });
+    toast.success(`Switched to ${next === 'light' ? 'Light (White)' : 'Dark (Black)'} Mode`);
   };
 
   const isLoginPage = pathname === '/admin/login';
@@ -222,7 +222,7 @@ export default function AdminLayout({ children }) {
               </button>
 
               <button
-                onClick={() => toast('System Notifications: All systems running smoothly', { icon: '🔔' })}
+                onClick={() => toast('System Notifications: All systems running smoothly')}
                 className="relative p-2.5 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all"
                 title="Notifications"
               >

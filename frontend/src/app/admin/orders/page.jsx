@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import api from '../../../lib/api';
-import { Search, Eye, Truck, CreditCard, X, ChevronLeft, ChevronRight, Package, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Search, Eye, Truck, CreditCard, X, ChevronLeft, ChevronRight, Package, Clock, CheckCircle, XCircle, AlertCircle, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const STATUS_CONFIG = {
@@ -496,7 +496,7 @@ export default function AdminOrdersPage() {
                   }}
                   className="px-5 py-2.5 bg-[#7B1E3B] hover:bg-[#651828] text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-2"
                 >
-                  📄 Print Order Invoice
+                  <Printer size={14} /> Print Order Invoice
                 </button>
               </div>
             </div>

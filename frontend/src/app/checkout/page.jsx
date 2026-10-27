@@ -300,7 +300,7 @@ export default function CheckoutPage() {
                     >
                       <div>
                         <p className="text-sm font-bold text-neutral-900">Outside Dhaka</p>
-                        <p className="text-xs text-neutral-500">All Other Districts 🇧🇩</p>
+                        <p className="text-xs text-neutral-500">All Other Districts</p>
                       </div>
                       <span className="text-sm font-extrabold text-[#7B1E3B] bg-[#7B1E3B]/10 px-2.5 py-1 rounded-lg">
                         ৳120

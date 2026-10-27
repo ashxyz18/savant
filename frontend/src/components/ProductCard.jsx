@@ -24,7 +24,7 @@ const ProductCard = ({ product, onQuickView }) => {
     e.stopPropagation();
     setIsWishlisted(!isWishlisted);
     if (!isWishlisted) {
-      toast.success('Added to wishlist', { icon: '❤️' });
+      toast.success('Added to wishlist');
     }
   };
 
@@ -120,7 +120,7 @@ const ProductCard = ({ product, onQuickView }) => {
           </div>
         )}
 
-        <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-end justify-center pb-6 transition-all duration-500 ${
+        <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent hidden sm:flex items-end justify-center pb-6 transition-all duration-500 ${
           isHovered ? 'opacity-100' : 'opacity-0'
         }`}>
           <button
@@ -135,17 +135,17 @@ const ProductCard = ({ product, onQuickView }) => {
           </button>
         </div>
 
-        <div className={`absolute top-3 left-3 transition-all duration-300 ${
+        <div className={`absolute top-2 left-2 sm:top-3 sm:left-3 transition-all duration-300 ${
           isHovered ? 'translate-y-0 opacity-100' : 'translate-y-0 opacity-100'
         }`}>
-          <span className={`${badge.bg} ${badge.text} ${badge.border} border px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider backdrop-blur-sm`}>
+          <span className={`${badge.bg} ${badge.text} ${badge.border} border px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-md text-[8px] sm:text-[10px] font-semibold uppercase tracking-wider backdrop-blur-sm`}>
             {badge.label}
           </span>
         </div>
 
         <button
           onClick={handleWishlist}
-          className={`absolute top-3 right-3 p-2 rounded-lg transition-all duration-300 transform ${
+          className={`absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2 rounded-lg transition-all duration-300 transform ${
             isWishlisted
               ? 'bg-white text-red-500 shadow-md scale-100'
               : isHovered
@@ -153,27 +153,27 @@ const ProductCard = ({ product, onQuickView }) => {
                 : 'bg-white/70 text-neutral-400 scale-90 -translate-y-1'
           }`}
         >
-          <Heart className={`w-4 h-4 transition-transform duration-300 ${isWishlisted ? 'fill-red-500 scale-110' : ''}`} />
+          <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 ${isWishlisted ? 'fill-red-500 scale-110' : ''}`} />
         </button>
 
         {discount > 0 && (
-          <div className={`absolute bottom-3 left-3 bg-red-500 text-white px-2.5 py-1 rounded-md text-xs font-bold shadow-sm`}>
+          <div className={`absolute bottom-2 left-2 sm:bottom-3 sm:left-3 bg-red-500 text-white px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-bold shadow-sm`}>
             -{discount}%
           </div>
         )}
       </div>
 
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="text-sm font-semibold text-neutral-900 group-hover:text-primary-900 transition-colors duration-300 line-clamp-1">
+      <div className="p-2.5 sm:p-4">
+        <div className="flex items-start justify-between gap-2 mb-1 sm:mb-2">
+          <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 group-hover:text-primary-900 transition-colors duration-300 line-clamp-1">
             {product.name}
           </h3>
         </div>
 
-        <p className="text-xs text-neutral-500 mb-3">{product.material || 'Premium Leather'}</p>
+        <p className="hidden sm:block text-xs text-neutral-500 mb-3">{product.material || 'Premium Leather'}</p>
 
         {product.colors && product.colors.length > 0 && (
-          <div className="flex items-center gap-1.5 mb-3">
+          <div className="hidden sm:flex items-center gap-1.5 mb-3">
             {product.colors.slice(0, 5).map((color, idx) => (
               <div
                 key={idx}
@@ -188,19 +188,20 @@ const ProductCard = ({ product, onQuickView }) => {
           </div>
         )}
 
-        <div className="flex items-baseline gap-2 mb-4">
-          <span className="text-lg font-bold text-neutral-900">{formatBDT(product.price)}</span>
+        <div className="flex flex-wrap items-baseline gap-x-2 mb-2 sm:mb-4">
+          <span className="text-sm sm:text-lg font-bold text-neutral-900">{formatBDT(product.price)}</span>
           {product.originalPrice && (
-            <span className="text-xs text-neutral-400 line-through">{formatBDT(product.originalPrice)}</span>
+            <span className="text-[10px] sm:text-xs text-neutral-400 line-through">{formatBDT(product.originalPrice)}</span>
           )}
         </div>
 
-        <div className={`flex gap-2 transition-all duration-300 ${
+        <div className={`flex gap-1.5 sm:gap-2 transition-all duration-300 ${
           isHovered ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-0'
         }`}>
           <button
             onClick={handleAddToCart}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-300 ${
+            aria-label="Add to cart"
+            className={`flex-none sm:flex-1 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs font-medium transition-all duration-300 ${
               addedToCart
                 ? 'bg-success-500 text-white scale-95'
                 : isInCart
@@ -211,32 +212,32 @@ const ProductCard = ({ product, onQuickView }) => {
             {addedToCart ? (
               <>
                 <Check className="w-3.5 h-3.5 animate-bounce-in" />
-                Added!
+                <span className="hidden sm:inline">Added!</span>
               </>
             ) : isInCart ? (
               <>
                 <Check className="w-3.5 h-3.5" />
-                Added
+                <span className="hidden sm:inline">Added</span>
               </>
             ) : (
               <>
                 <ShoppingCart className="w-3.5 h-3.5" />
-                Add to Cart
+                <span className="hidden sm:inline">Add to Cart</span>
               </>
             )}
           </button>
 
           <button
             onClick={handleBuyNow}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-medium bg-primary-900 text-white hover:bg-primary-800 transition-all duration-300 active:scale-95"
+            className="flex-1 flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-[11px] sm:text-xs font-medium bg-primary-900 text-white hover:bg-primary-800 transition-all duration-300 active:scale-95 whitespace-nowrap"
           >
             Buy Now
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" />
+            <ArrowRight className="hidden sm:block w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" />
           </button>
         </div>
 
         {product.stock !== undefined && product.stock <= 10 && (
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-2 sm:mt-3 flex items-center justify-between">
             <span className="text-[10px] text-neutral-500 flex items-center gap-1">
               <span className={`inline-block w-1.5 h-1.5 rounded-full ${
                 product.stock <= 5 ? 'bg-red-500 animate-pulse' : 'bg-amber-500'

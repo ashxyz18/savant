@@ -410,7 +410,7 @@ export default function AdminSettings() {
               className={inputClass}
               value={form.socialAutoPost?.captionTemplate || ''}
               onChange={(e) => setNested('socialAutoPost', 'captionTemplate', e.target.value)}
-              placeholder="✨ NEW ARRIVAL AT SAVANT ✨&#10;&#10;👜 {productName}&#10;💰 Price: {price}&#10;🏷️ {sku}&#10;&#10;🛒 Order now: {productUrl}"
+              placeholder="NEW ARRIVAL AT SAVANT&#10;&#10;{productName}&#10;Price: {price}&#10;SKU: {sku}&#10;&#10;Order now: {productUrl}"
             />
           </Field>
         </div>
@@ -429,7 +429,7 @@ export default function AdminSettings() {
             }}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-2"
           >
-            🧪 Test Facebook Post
+            Test Facebook Post
           </button>
 
           <button
@@ -445,7 +445,7 @@ export default function AdminSettings() {
             }}
             className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-2"
           >
-            🧪 Test Instagram Post
+            Test Instagram Post
           </button>
         </div>
       </SectionCard>

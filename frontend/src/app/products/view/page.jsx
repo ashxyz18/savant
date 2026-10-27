@@ -24,7 +24,10 @@ import {
   Info,
   FileText,
   X,
-  Star
+  Star,
+  Ruler,
+  Droplets,
+  Sparkles
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -303,7 +306,7 @@ function ProductDetailPage() {
               {product.dimensions && (product.dimensions.height || product.dimensions.width) && (
                 <div className="p-3.5 bg-amber-50/50 rounded-xl border border-amber-200/60">
                   <div className="flex items-center gap-2 text-xs font-bold text-amber-900 mb-0.5">
-                    📐 Bag / Product Dimensions
+                    <Ruler size={14} /> Bag / Product Dimensions
                   </div>
                   <p className="text-sm font-mono font-bold text-neutral-800">
                     {[product.dimensions.height, product.dimensions.width, product.dimensions.depth].filter(Boolean).join(' × ')} {product.dimensions.unit || 'in'}
@@ -321,7 +324,7 @@ function ProductDetailPage() {
                     </span>
                     <button
                       type="button"
-                      onClick={() => toast('Standard sizing guide: Bags (Small/Medium/Large), Belts (32"-42")', { icon: '📏' })}
+                      onClick={() => toast('Standard sizing guide: Bags (Small/Medium/Large), Belts (32"-42")')}
                       className="text-xs text-[#7B1E3B] font-semibold hover:underline flex items-center gap-1"
                     >
                       Size Guide
@@ -448,8 +451,8 @@ function ProductDetailPage() {
                   <Share2 size={14} />
                   Share this product
                 </button>
-                <span className="text-xs font-semibold text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-md">
-                  🚚 Delivery: ৳80 Inside Dhaka | ৳120 Outside
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-md">
+                  <Truck size={13} /> Delivery: ৳80 Inside Dhaka | ৳120 Outside
                 </span>
               </div>
             </div>
@@ -567,7 +570,7 @@ function ProductDetailPage() {
                   </div>
                   <div className="flex justify-between p-3.5">
                     <span className="text-neutral-500 font-medium">Origin</span>
-                    <span className="font-semibold text-neutral-900">Handcrafted in Bangladesh 🇧🇩</span>
+                    <span className="font-semibold text-neutral-900">Handcrafted in Bangladesh</span>
                   </div>
                 </div>
               </div>
@@ -578,13 +581,13 @@ function ProductDetailPage() {
                 <h3 className="font-bold text-lg text-neutral-900">Leather Care & Maintenance</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div className="p-4 bg-neutral-50 rounded-xl border border-neutral-100">
-                    <h4 className="font-bold text-[#7B1E3B] mb-1">🧼 Cleaning</h4>
+                    <h4 className="flex items-center gap-2 font-bold text-[#7B1E3B] mb-1"><Droplets size={15} /> Cleaning</h4>
                     <p className="text-neutral-600 text-xs leading-relaxed">
                       Wipe gently with a soft dry cloth. For stains, use a damp cloth with leather cleaner. Avoid water soaking.
                     </p>
                   </div>
                   <div className="p-4 bg-neutral-50 rounded-xl border border-neutral-100">
-                    <h4 className="font-bold text-[#7B1E3B] mb-1">✨ Conditioning</h4>
+                    <h4 className="flex items-center gap-2 font-bold text-[#7B1E3B] mb-1"><Sparkles size={15} /> Conditioning</h4>
                     <p className="text-neutral-600 text-xs leading-relaxed">
                       Apply quality leather conditioner every 3-6 months to preserve softness, prevent cracks, and enrich patina.
                     </p>

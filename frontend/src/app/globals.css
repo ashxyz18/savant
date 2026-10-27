@@ -222,6 +222,39 @@
   }
 }
 
+/* ============ Hero (refined / editorial) ============ */
+@keyframes heroKenBurns {
+  0% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes heroWordIn {
+  0% { opacity: 0; transform: translateY(18px); filter: blur(6px); letter-spacing: 0.04em; }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); letter-spacing: 0; }
+}
+@keyframes heroLineGrow {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+@keyframes heroScrollCue {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(200%); }
+}
+@keyframes heroProgress {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+.hero-video { animation: heroKenBurns 12s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hero-word { display: inline-block; animation: heroWordIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hero-line { transform-origin: left; animation: heroLineGrow 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both; }
+.hero-scroll-cue { animation: heroScrollCue 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+.hero-progress { transform-origin: left; animation: heroProgress var(--hero-interval, 3.5s) linear both; }
+.text-champagne { color: #d9c3a0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-video, .hero-word, .hero-line, .hero-scroll-cue, .hero-progress { animation: none !important; }
+}
+
 /* Admin Panel Light Mode Theme Overrides */
 .admin-light-mode {
   background-color: #F8FAFC !important;

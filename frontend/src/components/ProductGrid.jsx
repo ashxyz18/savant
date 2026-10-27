@@ -223,7 +223,7 @@ const ProductGrid = ({ activeFilter, activeSubcategory = '', onQuickView }) => {
 
         {/* Loading State */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
                 <div className="aspect-square bg-neutral-100 shimmer" />
@@ -240,7 +240,7 @@ const ProductGrid = ({ activeFilter, activeSubcategory = '', onQuickView }) => {
             ))}
           </div>
         ) : products.length > 0 ? (
-          <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
+          <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-2 sm:grid-cols-1'}`}>
             {products.map((product, index) => (
               <div
                 key={product._id}

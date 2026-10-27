@@ -731,7 +731,7 @@ export default function AdminProductsPage() {
                   {/* Dimensions */}
                   <div>
                     <label className="block text-sm font-medium text-neutral-300 mb-2">
-                      📐 Product Dimensions
+                      Product Dimensions
                       <span className="text-neutral-500 font-normal ml-1">(H × W × D)</span>
                     </label>
                     <div className="grid grid-cols-4 gap-2">

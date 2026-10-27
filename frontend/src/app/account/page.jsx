@@ -7,7 +7,7 @@ import api from '../../lib/api';
 import { formatBDT } from '../../lib/format';
 import { 
   User, Package, Settings, LogOut, Edit, 
-  Calendar, MapPin, CreditCard, Truck, CheckCircle, Clock, XCircle 
+  Calendar, MapPin, CreditCard, Truck, CheckCircle, Clock, XCircle, X 
 } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -472,7 +472,7 @@ export default function AccountPage() {
                  onClick={() => setShowOrderModal(false)}
                  className="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 transition-colors"
                >
-                 ✕
+                 <X className="w-4 h-4" />
                </button>
              </div>
 
